@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TypeRace — Carrera de Mecanografía Multijugador</title>
+  <meta name="description" content="Juego multijugador de carreras de mecanografía y reflejos en tiempo real. ¡Escribe más rápido que tus rivales!" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #060b18;
+      --surface:   #0d1626;
+      --panel:     #111d35;
+      --border:    #1e3054;
+      --accent:    #00d4ff;
+      --accent2:   #7c3aed;
+      --danger:    #ff3b5c;
+      --ok:        #00e5a0;
+      --warn:      #ffbe0b;
+      --text:      #e8f0fe;
+      --muted:     #6b8ab8;
+      --glow:      rgba(0, 212, 255, 0.35);
+      --glow-r:    rgba(255, 59, 92, 0.40);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Outfit", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Starfield BG ──────────────────────────────────────────────────── */
+    #stars-canvas {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    }
+
+    .content { position: relative; z-index: 1; }
+
+    /* ── Header ────────────────────────────────────────────────────────── */
+    header {
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      background: rgba(13, 22, 38, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      box-shadow: 0 0 18px var(--glow);
+    }
+    h1 {
+      font-size: 1.3rem; font-weight: 900; letter-spacing: 0.06em;
+      background: linear-gradient(90deg, var(--accent), #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .hud {
+      display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.88rem;
+    }
+    .hud-item {
+      display: flex; flex-direction: column; align-items: center;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.3rem 0.8rem; min-width: 70px;
+    }
+    .hud-label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; }
+    .hud-value { color: var(--accent); font-weight: 700; font-size: 1.05rem; margin-top: 1px; }
+    .hud-value.danger { color: var(--danger); }
+    .hud-value.ok { color: var(--ok); }
+
+    /* ── Main layout ───────────────────────────────────────────────────── */
+    main {
+      padding: 1.5rem 2rem 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── Join panel ────────────────────────────────────────────────────── */
+    #join-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    #join-panel label {
+      color: var(--muted); font-size: 0.85rem; margin-right: -0.5rem;
+    }
+
+    input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 0.6rem 1rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+    }
+
+    .btn {
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      padding: 0.6rem 1.4rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7 0%, #7c3aed 100%);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(0, 132, 199, 0.30);
+    }
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(0, 132, 199, 0.45);
+    }
+    .btn-success {
+      background: linear-gradient(135deg, #00b890 0%, #00e5a0 100%);
+      color: #001a12;
+      box-shadow: 0 4px 16px rgba(0, 229, 160, 0.30);
+    }
+    .btn-success:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(0, 229, 160, 0.45);
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+    #status-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.55rem 1rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+      flex: 1;
+      min-width: 200px;
+    }
+
+    /* ── Target panel ──────────────────────────────────────────────────── */
+    #target-panel {
+      position: relative;
+      text-align: center;
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.5rem;
+      border-radius: 18px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    #target-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(0,212,255,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    #target-panel.locked {
+      border-color: var(--danger);
+      box-shadow: 0 0 40px var(--glow-r);
+    }
+    #target-panel.locked::before {
+      background: radial-gradient(ellipse at center, rgba(255,59,92,0.12) 0%, transparent 70%);
+    }
+
+    #target-label {
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.5rem;
+    }
+    #target-value {
+      font-family: "JetBrains Mono", "Consolas", monospace;
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      background: linear-gradient(90deg, #e8f0fe, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transition: all 0.2s;
+      word-break: break-all;
+    }
+    #target-panel.locked #target-value {
+      background: linear-gradient(90deg, var(--danger), #ff8fa3);
+      -webkit-background-clip: text;
+    }
+
+    .lock-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 59, 92, 0.08);
+      border-radius: 18px;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--danger);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      animation: pulse-lock 0.5s ease-in-out infinite alternate;
+    }
+    #target-panel.locked .lock-overlay { display: flex; }
+    @keyframes pulse-lock {
+      from { opacity: 0.6; } to { opacity: 1; }
+    }
+
+    .round-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent2), #a855f7);
+      color: #fff;
+      border-radius: 20px;
+      padding: 0.2rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ── Race canvas ───────────────────────────────────────────────────── */
+    #race-canvas-wrap {
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: #040a14;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+    }
+    canvas#raceCanvas {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* ── Winner overlay ────────────────────────────────────────────────── */
+    #winner-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(6, 11, 24, 0.85);
+      backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+    }
+    #winner-overlay.show { display: flex; }
+    .winner-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 3rem 4rem;
+      text-align: center;
+      animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 0 80px rgba(0, 229, 160, 0.25);
+    }
+    @keyframes pop-in {
+      from { transform: scale(0.7); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    .winner-trophy { font-size: 4rem; margin-bottom: 0.5rem; }
+    .winner-title { font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; }
+    .winner-name {
+      font-size: 2.5rem; font-weight: 900; margin: 0.3rem 0 0.2rem;
+      background: linear-gradient(90deg, var(--ok), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .winner-score { font-size: 1.1rem; color: var(--muted); }
+    .btn-restart { margin-top: 1.5rem; }
+
+    /* ── Countdown overlay ─────────────────────────────────────────────── */
+    #countdown-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    #countdown-overlay.show { display: flex; }
+    #countdown-num {
+      font-size: 12rem;
+      font-weight: 900;
+      color: var(--accent);
+      text-shadow: 0 0 80px var(--glow);
+      animation: countdown-pop 0.8s ease-out;
+    }
+    @keyframes countdown-pop {
+      0%   { transform: scale(2); opacity: 0; }
+      50%  { transform: scale(1); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0; }
+    }
+
+    /* ── Streak badge ──────────────────────────────────────────────────── */
+    .streak-fire {
+      display: inline-flex; gap: 0.2rem; align-items: center;
+    }
+
+    /* ── Responsive ────────────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      main { padding: 1rem; }
+      header { padding: 0.75rem 1rem; }
+      #join-panel { padding: 1rem; }
+      .winner-card { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Starfield canvas -->
+  <canvas id="stars-canvas"></canvas>
+
+  <div class="content">
+    <!-- ── Header ───────────────────────────────────────────── -->
+    <header>
+      <div class="logo">
+        <div class="logo-icon">⌨</div>
+        <h1>TypeRace</h1>
+      </div>
+      <div class="hud">
+        <div class="hud-item">
+          <span class="hud-label">Ronda</span>
+          <span class="hud-value" id="round">-</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Tiempo</span>
+          <span class="hud-value" id="time">-</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Racha</span>
+          <span class="hud-value" id="streak">0🔥</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Modo</span>
+          <span class="hud-value" id="roundKind">—</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Estado</span>
+          <span class="hud-value" id="gameStatus">Off</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- ── Join panel ──────────────────────────────────────── -->
+      <div id="join-panel">
+        <label for="nameInput">Nombre:</label>
+        <input id="nameInput" type="text" placeholder="Tu apodo" maxlength="20" autocomplete="off" />
+        <button id="connectBtn" class="btn btn-primary">🔌 Conectar</button>
+        <button id="startBtn" class="btn btn-success" disabled>🏁 Iniciar Partida</button>
+        <div id="status-bar">Introduce tu nombre y conéctate al servidor.</div>
+      </div>
+
+      <!-- ── Target panel ────────────────────────────────────── -->
+      <div id="target-panel">
+        <div class="round-badge" id="roundBadge">Ronda 1 · Flechas</div>
+        <div id="target-label">OBJETIVO A TECLEAR</div>
+        <div id="target-value">—</div>
+        <div class="lock-overlay">🔒 BLOQUEADO 1s</div>
+      </div>
+
+      <!-- ── Race canvas ─────────────────────────────────────── -->
+      <div id="race-canvas-wrap">
+        <canvas id="raceCanvas" width="1100" height="420"></canvas>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── Winner overlay ───────────────────────────────────────── -->
+  <div id="winner-overlay">
+    <div class="winner-card">
+      <div class="winner-trophy">🏆</div>
+      <div class="winner-title">¡Ganador!</div>
+      <div class="winner-name" id="winner-name">—</div>
+      <div class="winner-score" id="winner-score"></div>
+      <button class="btn btn-primary btn-restart" onclick="document.getElementById('winner-overlay').classList.remove('show')">
+        Cerrar
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Countdown overlay ─────────────────────────────────────── -->
+  <div id="countdown-overlay">
+    <div id="countdown-num"></div>
+  </div>
+
+  <script>
+    /* ═══════════════════════════════════════════════════════════════════
+       STARFIELD
+    ═══════════════════════════════════════════════════════════════════ */
+    (function () {
+      const c = document.getElementById("stars-canvas");
+      const ctx = c.getContext("2d");
+      let stars = [];
+      function resize() {
+        c.width = window.innerWidth;
+        c.height = window.innerHeight;
+        stars = Array.from({ length: 180 }, () => ({
+          x: Math.random() * c.width,
+          y: Math.random() * c.height,
+          r: Math.random() * 1.5 + 0.3,
+          a: Math.random(),
+          speed: Math.random() * 0.004 + 0.001,
+        }));
+      }
+      function draw(t) {
+        ctx.clearRect(0, 0, c.width, c.height);
+        stars.forEach(s => {
+          s.a += s.speed;
+          const alpha = (Math.sin(s.a) * 0.5 + 0.5) * 0.8 + 0.1;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(180,210,255,${alpha})`;
+          ctx.fill();
+        });
+        requestAnimationFrame(draw);
+      }
+      resize();
+      window.addEventListener("resize", resize);
+      requestAnimationFrame(draw);
+    })();
+
+    /* ═══════════════════════════════════════════════════════════════════
+       GAME STATE & WS
+    ═══════════════════════════════════════════════════════════════════ */
+    const canvas       = document.getElementById("raceCanvas");
+    const ctx          = canvas.getContext("2d");
+    const nameInput    = document.getElementById("nameInput");
+    const connectBtn   = document.getElementById("connectBtn");
+    const startBtn     = document.getElementById("startBtn");
+    const targetPanel  = document.getElementById("target-panel");
+    const targetValue  = document.getElementById("target-value");
+    const roundEl      = document.getElementById("round");
+    const timeEl       = document.getElementById("time");
+    const streakEl     = document.getElementById("streak");
+    const roundKindEl  = document.getElementById("roundKind");
+    const gameStatusEl = document.getElementById("gameStatus");
+    const statusBar    = document.getElementById("status-bar");
+    const roundBadge   = document.getElementById("roundBadge");
+
+    let ws = null, selfId = null, lastState = null, connected = false;
+    let prevRound = 0;
+
+    const LANE_COLORS = [
+      ["#00d4ff","#0090c0"],
+      ["#a855f7","#7c3aed"],
+      ["#f472b6","#db2777"],
+      ["#34d399","#059669"],
+      ["#fbbf24","#d97706"],
+      ["#60a5fa","#2563eb"],
+      ["#fb7185","#be123c"],
+      ["#4ade80","#16a34a"],
+    ];
+
+    /* ─── Helpers ─────────────────────────────────── */
+    function formatTime(ms) {
+      const s = Math.max(0, Math.ceil(ms / 1000));
+      return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    }
+
+    function roundKindLabel(k) {
+      return { Arrows: "Flechas ↑↓←→", Alphanumeric: "Alfanum.", Words: "Palabras" }[k] ?? k;
+    }
+
+    function displayTarget(p, roundKind) {
+      if (!p) return "—";
+      const t = p.currentTarget || "—";
+      if (roundKind === "Words" && p.targetProgress > 0 && t.length > 1) {
+        const done = t.slice(0, p.targetProgress);
+        const cur  = t[p.targetProgress] ?? "";
+        const rest = t.slice(p.targetProgress + 1);
+        return `<span style="color:var(--ok);text-shadow:0 0 12px rgba(0,229,160,.6)">${done}</span>` +
+               `<span style="color:var(--accent);text-decoration:underline">${cur}</span>` +
+               `<span style="opacity:.45">${rest}</span>`;
+      }
+      if (roundKind === "Arrows") {
+        const map = { UP: "↑", DOWN: "↓", LEFT: "←", RIGHT: "→" };
+        return `<span style="font-size:1.4em">${map[t] ?? t}</span>`;
+      }
+      return `<span>${t}</span>`;
+    }
+
+    /* ─── Canvas race ─────────────────────────────── */
+    function drawRace(state) {
+      if (!state) return;
+      const players = state.players ?? [];
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      // Background grid lines
+      ctx.strokeStyle = "rgba(30,48,84,0.4)";
+      ctx.lineWidth = 1;
+      for (let x = 0; x < W; x += 80) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      }
+
+      const n      = Math.max(players.length, 1);
+      const laneH  = Math.floor((H - 30) / n);
+      const maxSc  = Math.max(50, ...players.map(p => p.score), 1);
+      const PAD_L  = 160, PAD_R = 40;
+      const trackW = W - PAD_L - PAD_R;
+
+      players.forEach((p, i) => {
+        const yCenter = 20 + i * laneH + laneH / 2;
+        const pct     = Math.min(1, p.score / maxSc);
+        const carX    = PAD_L + pct * trackW;
+        const [clr1, clr2] = LANE_COLORS[i % LANE_COLORS.length];
+        const isSelf  = p.id === selfId;
+
+        // Track lane
+        const trackGrad = ctx.createLinearGradient(PAD_L, 0, W - PAD_R, 0);
+        trackGrad.addColorStop(0, "rgba(30,48,84,0.3)");
+        trackGrad.addColorStop(1, "rgba(30,48,84,0.05)");
+        ctx.fillStyle = trackGrad;
+        ctx.beginPath();
+        ctx.roundRect(PAD_L, yCenter - 6, trackW, 12, 6);
+        ctx.fill();
+
+        // Progress fill
+        if (pct > 0) {
+          const progGrad = ctx.createLinearGradient(PAD_L, 0, carX, 0);
+          progGrad.addColorStop(0, clr2 + "44");
+          progGrad.addColorStop(1, clr1 + "88");
+          ctx.fillStyle = progGrad;
+          ctx.beginPath();
+          ctx.roundRect(PAD_L, yCenter - 5, pct * trackW, 10, 5);
+          ctx.fill();
+        }
+
+        // Finish flag strip
+        ctx.fillStyle = "rgba(255,255,255,0.07)";
+        ctx.fillRect(W - PAD_R - 4, yCenter - 12, 4, 24);
+
+        // Glow behind car
+        if (isSelf || pct > 0.02) {
+          const glowRad = ctx.createRadialGradient(carX, yCenter, 0, carX, yCenter, 36);
+          glowRad.addColorStop(0, clr1 + "55");
+          glowRad.addColorStop(1, "transparent");
+          ctx.fillStyle = glowRad;
+          ctx.beginPath();
+          ctx.arc(carX, yCenter, 36, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Car body (rounded rect)
+        const carW = isSelf ? 50 : 44, carHh = isSelf ? 22 : 18;
+        const carGrad = ctx.createLinearGradient(carX - carW/2, yCenter - carHh/2, carX - carW/2, yCenter + carHh/2);
+        carGrad.addColorStop(0, clr1);
+        carGrad.addColorStop(1, clr2);
+        ctx.fillStyle = carGrad;
+        ctx.beginPath();
+        ctx.roundRect(carX - carW / 2, yCenter - carHh / 2, carW, carHh, 8);
+        ctx.fill();
+
+        // Windshield highlight
+        ctx.fillStyle = "rgba(255,255,255,0.25)";
+        ctx.beginPath();
+        ctx.roundRect(carX - carW / 2 + 4, yCenter - carHh / 2 + 3, carW - 18, carHh / 2 - 3, 4);
+        ctx.fill();
+
+        // Lock ring
+        if (p.isLocked) {
+          ctx.strokeStyle = "var(--danger)";
+          ctx.lineWidth = 3;
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.roundRect(carX - carW / 2 - 4, yCenter - carHh / 2 - 4, carW + 8, carHh + 8, 11);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        // Self highlight ring
+        if (isSelf) {
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 2;
+          ctx.globalAlpha = 0.5;
+          ctx.beginPath();
+          ctx.roundRect(carX - carW / 2 - 3, yCenter - carHh / 2 - 3, carW + 6, carHh + 6, 10);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+
+        // Player name label
+        ctx.fillStyle = isSelf ? "#f8fafc" : "#94a3b8";
+        ctx.font = `${isSelf ? "700" : "600"} 13px "Outfit", sans-serif`;
+        ctx.textBaseline = "middle";
+        ctx.fillText(`${p.displayName}`, 8, yCenter - 6);
+        ctx.fillStyle = isSelf ? clr1 : "#6b8ab8";
+        ctx.font = `600 11px "Outfit", sans-serif`;
+        ctx.fillText(`${p.score} pts`, 8, yCenter + 8);
+
+        // Streak badge
+        if (p.streak >= 2) {
+          ctx.fillStyle = "#fbbf24";
+          ctx.font = "bold 11px sans-serif";
+          ctx.fillText(`🔥×${p.streak}`, carX - 14, yCenter - carHh / 2 - 8);
+        }
+      });
+    }
+
+    /* ─── State application ───────────────────────── */
+    function applyState(msg) {
+      const s    = msg.state;
+      lastState  = s;
+      selfId     = msg.selfId;
+
+      const me   = s.players.find(p => p.id === selfId);
+      const secs = Math.max(0, Math.ceil(s.timeRemainingMs / 1000));
+
+      roundEl.textContent    = s.round;
+      timeEl.textContent     = formatTime(s.timeRemainingMs);
+      timeEl.className       = `hud-value${secs <= 10 ? " danger" : ""}`;
+      streakEl.textContent   = me ? `${me.streak}${me.streak >= 3 ? "🔥" : ""}` : "0";
+      roundKindEl.textContent = roundKindLabel(s.roundKind);
+      roundBadge.textContent = `Ronda ${s.round} · ${roundKindLabel(s.roundKind)}`;
+
+      // Trigger countdown when round changes
+      if (s.round !== prevRound && s.isRunning) {
+        showCountdown(s.round);
+        prevRound = s.round;
+      } else if (s.isRunning && prevRound === 0) {
+        prevRound = s.round;
+      }
+
+      // Target
+      targetValue.innerHTML = displayTarget(me, s.roundKind);
+      if (me?.isLocked) targetPanel.classList.add("locked");
+      else              targetPanel.classList.remove("locked");
+
+      // Game status
+      if (s.isFinished) {
+        gameStatusEl.textContent = "FIN";
+        gameStatusEl.className   = "hud-value ok";
+        startBtn.disabled        = true;
+        const winner = s.players.find(p => p.id === s.winnerId);
+        if (winner) {
+          document.getElementById("winner-name").textContent  = winner.displayName;
+          document.getElementById("winner-score").textContent = `${winner.score} puntos`;
+          document.getElementById("winner-overlay").classList.add("show");
+        }
+        statusBar.textContent = "¡Partida finalizada!";
+      } else if (s.isRunning) {
+        gameStatusEl.textContent = "EN JUEGO";
+        gameStatusEl.className   = "hud-value ok";
+        startBtn.disabled        = true;
+        statusBar.textContent    = "¡Escribe el objetivo lo más rápido posible!";
+      } else {
+        gameStatusEl.textContent = "Lobby";
+        gameStatusEl.className   = "hud-value";
+        startBtn.disabled        = !connected || s.players.length === 0;
+        statusBar.textContent    = `${s.players.length} jugador(es) en el lobby. Pulsa Iniciar para comenzar.`;
+      }
+    }
+
+    /* ─── Countdown animation ─────────────────────── */
+    function showCountdown(round) {
+      const overlay = document.getElementById("countdown-overlay");
+      const numEl   = document.getElementById("countdown-num");
+      overlay.classList.add("show");
+      numEl.textContent = round > 1 ? `Ronda ${round}` : "¡GO!";
+      setTimeout(() => overlay.classList.remove("show"), 900);
+    }
+
+    /* ─── WebSocket ───────────────────────────────── */
+    function connect() {
+      const name     = (nameInput.value || "Jugador").trim();
+      const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+      ws = new WebSocket(`${protocol}//${location.host}/ws?name=${encodeURIComponent(name)}`);
+
+      ws.onopen = () => {
+        connected          = true;
+        connectBtn.disabled = true;
+        nameInput.disabled  = true;
+        gameStatusEl.textContent = "Lobby";
+        statusBar.textContent    = "Conectado. Esperando jugadores…";
+      };
+
+      ws.onmessage = ev => {
+        try {
+          const msg = JSON.parse(ev.data);
+          if (msg.type === "state") applyState(msg);
+          if (msg.type === "error") statusBar.textContent = "Error: " + msg.message;
+        } catch (e) {
+          console.warn("Mensaje inválido", e);
+        }
+      };
+
+      ws.onclose = () => {
+        connected            = false;
+        connectBtn.disabled  = false;
+        nameInput.disabled   = false;
+        startBtn.disabled    = true;
+        gameStatusEl.textContent = "Off";
+        gameStatusEl.className   = "hud-value danger";
+        statusBar.textContent    = "Conexión cerrada. Puedes reconectarte.";
+      };
+
+      ws.onerror = () => {
+        statusBar.textContent = "Error de conexión WebSocket.";
+      };
+    }
+
+    function sendInput(key) {
+      if (!ws || ws.readyState !== WebSocket.OPEN || !lastState?.isRunning) return;
+      ws.send(JSON.stringify({ type: "input", key }));
+    }
+
+    /* ─── Events ──────────────────────────────────── */
+    connectBtn.addEventListener("click", connect);
+    startBtn.addEventListener("click", () => {
+      if (ws?.readyState === WebSocket.OPEN)
+        ws.send(JSON.stringify({ type: "start" }));
+    });
+
+    nameInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") connect();
+    });
+
+    window.addEventListener("keydown", ev => {
+      if (!connected || !lastState?.isRunning) return;
+      if (ev.target === nameInput) return;
+      ev.preventDefault();
+      sendInput(ev.key);
+    });
+
+    /* ─── Render loop ─────────────────────────────── */
+    (function loop() {
+      if (lastState) drawRace(lastState);
+      requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+</html>
