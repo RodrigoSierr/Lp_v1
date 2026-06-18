@@ -21,7 +21,9 @@ object GameEvent:
   final case class PlayerLeft(playerId: String)                        extends GameEvent
   final case class PlayerInput(playerId: String, key: String, atMs: Long) extends GameEvent
   final case class Tick(nowMs: Long, deltaMs: Long)                    extends GameEvent
+  final case class UsePowerUp(playerId: String, atMs: Long)            extends GameEvent
   final case object StartGame                                          extends GameEvent
+  final case object ResetLobby                                         extends GameEvent
 
 /** Estado de un jugador en la carrera. */
 final case class PlayerState(
@@ -32,7 +34,10 @@ final case class PlayerState(
     currentTarget: String,
     targetProgress: Int,
     lockedUntil: Option[Long],
-    targetSequence: Int
+    targetSequence: Int,
+    powerUp: Option[String],
+    activeDebuffs: List[String],
+    typingHistory: List[Long]
 )
 
 /** Estado global del juego. */

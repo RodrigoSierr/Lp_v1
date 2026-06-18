@@ -51,11 +51,32 @@ class GameLogicSpec extends AnyFunSuite:
 
     val afterRound = GameLogic.updateState(
       running,
-      GameEvent.Tick(nowMs = 61_000L, deltaMs = GameConfig.RoundDurationMs)
+      GameEvent.Tick(nowMs = 61_000L, deltaMs = GameConfig.roundDurationMs(1))
     )
 
     assert(afterRound.round == 2)
-    assert(afterRound.timeRemainingMs == GameConfig.RoundDurationMs)
+    assert(afterRound.timeRemainingMs == GameConfig.roundDurationMs(2))
+  }
+
+  test("Al salir el ultimo jugador de una partida finalizada se reinicia el lobby") {
+    val running = GameLogic.updateState(
+      GameLogic.updateState(
+        GameLogic.initialState(seed),
+        GameEvent.PlayerJoined("p1", "Ana")
+      ),
+      GameEvent.StartGame
+    )
+    val finished = GameLogic.updateState(
+      running.copy(round = GameConfig.TotalRounds),
+      GameEvent.Tick(nowMs = 61_000L, deltaMs = GameConfig.roundDurationMs(GameConfig.TotalRounds))
+    )
+
+    val reset = GameLogic.updateState(finished, GameEvent.PlayerLeft("p1"))
+
+    assert(!reset.isFinished)
+    assert(!reset.isRunning)
+    assert(reset.players.isEmpty)
+    assert(reset.round == 1)
   }
 
   test("WordGenerator es determinista para la misma semilla") {

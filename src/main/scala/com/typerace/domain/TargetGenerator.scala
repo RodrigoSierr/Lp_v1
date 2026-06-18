@@ -8,11 +8,11 @@ object TargetGenerator:
   private val Alphanumeric: Vector[String] =
     ('a' to 'z').map(_.toString).toVector ++ ('0' to '9').map(_.toString).toVector
 
-  def generate(round: Int, seed: Long, sequence: Int): String =
+  def generate(round: Int, seed: Long, sequence: Int, level: Int = 1): String =
     RoundKind.fromRound(round) match
       case RoundKind.Arrows       => arrowTarget(seed, sequence)
       case RoundKind.Alphanumeric => alphanumericTarget(seed, sequence)
-      case RoundKind.Words        => WordGenerator.generateWord(seed, sequence)
+      case RoundKind.Words        => WordGenerator.generateWord(seed, sequence, level)
 
   private def arrowTarget(seed: Long, sequence: Int): String =
     val idx = WordGenerator.pickIndex(seed, sequence * 17 + 1, Arrows.size)

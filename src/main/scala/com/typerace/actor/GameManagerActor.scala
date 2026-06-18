@@ -1,6 +1,6 @@
 package com.typerace.actor
 
-import com.typerace.domain.{GameEvent, GameLogic, GameState, GameJson}
+import com.typerace.domain.{GameConfig, GameEvent, GameLogic, GameState, GameJson}
 import org.apache.pekko.actor.typed.{ActorRef, Behavior}
 import org.apache.pekko.actor.typed.scaladsl.{ActorContext, Behaviors, TimerScheduler}
 
@@ -22,10 +22,14 @@ object GameManagerActor:
   final case class Unregister(playerId: String) extends Command
 
   final case class PlayerKeyInput(playerId: String, key: String) extends Command
+  final case class UsePowerUp(playerId: String) extends Command
 
   final case object StartGame extends Command
 
   private final case object Tick extends Command
+  private final case object ResetLobby extends Command
+
+  private val ResetDelay: FiniteDuration = 10.seconds
 
   /** Estado interno del manager (inmutable). */
   private final case class ManagerState(
@@ -59,28 +63,34 @@ object GameManagerActor:
 
           // ── Crear sesión (spawneamos desde dentro del actor) ──────────────
           case CreateSession(playerId, displayName, wsOut, replyTo) =>
-            val sessionRef = ctx.spawn(
-              PlayerSessionActor(playerId, displayName, ctx.self, wsOut),
-              s"session-${playerId.take(8)}"
-            )
-            ctx.watch(sessionRef)
-            replyTo ! sessionRef
+            joinRejectionReason(state.gameState) match
+              case Some(reason) =>
+                val sessionRef = ctx.spawn(
+                  PlayerSessionActor.rejected(reason, wsOut),
+                  s"rejected-${playerId.take(8)}"
+                )
+                replyTo ! sessionRef
+                ctx.log.warn("Rechazando {}: {}", playerId, reason)
+                Behaviors.same
 
-            val joined = GameLogic.updateState(
-              state.gameState,
-              GameEvent.PlayerJoined(playerId, displayName)
-            )
-            if joined.players.contains(playerId) then
-              val next = state.copy(
-                gameState = joined,
-                sessions  = state.sessions + (playerId -> sessionRef)
-              )
-              broadcast(ctx, next)
-              running(ctx, next)
-            else
-              ctx.log.warn("Lobby lleno, rechazando {}", playerId)
-              sessionRef ! PlayerSessionActor.Rejected
-              Behaviors.same
+              case None =>
+                val sessionRef = ctx.spawn(
+                  PlayerSessionActor(playerId, displayName, ctx.self, wsOut),
+                  s"session-${playerId.take(8)}"
+                )
+                ctx.watch(sessionRef)
+                replyTo ! sessionRef
+
+                val joined = GameLogic.updateState(
+                  state.gameState,
+                  GameEvent.PlayerJoined(playerId, displayName)
+                )
+                val next = state.copy(
+                  gameState = joined,
+                  sessions  = state.sessions + (playerId -> sessionRef)
+                )
+                broadcast(ctx, next)
+                running(ctx, next)
 
           // ── Desregistrar jugador ──────────────────────────────────────────
           case Unregister(playerId) =>
@@ -98,6 +108,18 @@ object GameManagerActor:
             val updated = GameLogic.updateState(
               state.gameState,
               GameEvent.PlayerInput(playerId, key, now)
+            )
+            if updated != state.gameState then
+              val next = state.copy(gameState = updated)
+              broadcast(ctx, next)
+              running(ctx, next)
+            else Behaviors.same
+
+          case UsePowerUp(playerId) =>
+            val now     = System.currentTimeMillis()
+            val updated = GameLogic.updateState(
+              state.gameState,
+              GameEvent.UsePowerUp(playerId, now)
             )
             if updated != state.gameState then
               val next = state.copy(gameState = updated)
@@ -123,11 +145,23 @@ object GameManagerActor:
                 state.gameState,
                 GameEvent.Tick(now, delta)
               )
+              // Si acaba de terminar la partida, programar reinicio en 10s
+              if !state.gameState.isFinished && ticked.isFinished then
+                ctx.scheduleOnce(ResetDelay, ctx.self, ResetLobby)
+                ctx.log.info("Partida finalizada. Reinicio del lobby en 10 segundos.")
               val next = state.copy(gameState = ticked, lastTickMs = now)
               broadcast(ctx, next)
               running(ctx, next)
             else
               running(ctx, state.copy(lastTickMs = now))
+
+          // ── Reinicio del lobby ────────────────────────────────────────────
+          case ResetLobby =>
+            ctx.log.info("Reiniciando lobby. Los jugadores conectados pueden volver a jugar.")
+            val reset = GameLogic.updateState(state.gameState, GameEvent.ResetLobby)
+            val next  = state.copy(gameState = reset)
+            broadcast(ctx, next)
+            running(ctx, next)
       }
       .receiveSignal {
         case (_, org.apache.pekko.actor.typed.Terminated(ref)) =>
@@ -143,6 +177,11 @@ object GameManagerActor:
             case None =>
               Behaviors.same
       }
+
+  private def joinRejectionReason(gameState: GameState): Option[String] =
+    if gameState.isRunning then Some("Partida en curso")
+    else if gameState.players.size >= GameConfig.MaxPlayers then Some("Lobby lleno")
+    else None
 
   private def broadcast(context: ActorContext[Command], state: ManagerState): Unit =
     val now = System.currentTimeMillis()

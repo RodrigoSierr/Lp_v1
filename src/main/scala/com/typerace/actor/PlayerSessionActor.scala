@@ -21,8 +21,8 @@ object PlayerSessionActor:
   /** El flujo WebSocket se cerró. */
   final case object StreamCompleted extends Command
 
-  /** Lobby lleno u otra razón de rechazo. */
-  final case object Rejected extends Command
+  /** Conexión rechazada antes de registrar al jugador. */
+  final case class Rejected(reason: String) extends Command
 
   def apply(
       playerId: String,
@@ -37,6 +37,12 @@ object PlayerSessionActor:
       active(context, playerId, gameManager, wsOut)
     }
 
+  def rejected(reason: String, wsOut: pekko.actor.ActorRef): Behavior[Command] =
+    Behaviors.setup { _ =>
+      wsOut ! TextMessage(s"""{"type":"error","message":"$reason"}""")
+      Behaviors.stopped
+    }
+
   private def active(
       context: ActorContext[Command],
       playerId: String,
@@ -48,6 +54,9 @@ object PlayerSessionActor:
         msg match
           case FromWebSocket(text) =>
             decode[GameJson.InboundMessage](text).foreach {
+              case GameJson.InboundMessage("input", Some(key)) if key == " " =>
+                gameManager ! GameManagerActor.UsePowerUp(playerId)
+
               case GameJson.InboundMessage("input", Some(key)) =>
                 gameManager ! GameManagerActor.PlayerKeyInput(playerId, key)
 
@@ -67,8 +76,8 @@ object PlayerSessionActor:
             ctx.log.info("WebSocket cerrado para {}", playerId)
             Behaviors.stopped
 
-          case Rejected =>
-            wsOut ! TextMessage("""{"type":"error","message":"Lobby lleno"}""")
+          case Rejected(reason) =>
+            wsOut ! TextMessage(s"""{"type":"error","message":"$reason"}""")
             Behaviors.stopped
       }
       .receiveSignal {

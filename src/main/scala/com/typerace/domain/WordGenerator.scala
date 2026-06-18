@@ -36,10 +36,11 @@ object WordGenerator:
     val coda   = Codas(pickIndex(s0, 2, Codas.size))
     s"$onset$nucleus$coda"
 
-  /** Genera una palabra legible uniendo entre 2 y 4 sílabas. */
-  def generateWord(seed: Long, wordIndex: Int): String =
+  /** Genera una palabra legible uniendo entre 2 y 4 sílabas (más si el nivel es mayor). */
+  def generateWord(seed: Long, wordIndex: Int, level: Int = 1): String =
     val sizeSeed      = nextSeed(seed, wordIndex * 97 + 11)
-    val syllableCount = 2 + pickIndex(sizeSeed, 0, 3) // 2..4
+    val baseSyllables = if level >= 3 then 4 else if level == 2 then 3 else 2
+    val syllableCount = baseSyllables + pickIndex(sizeSeed, 0, 2)
     val raw = (0 until syllableCount)
       .map(i => syllable(seed, wordIndex * 100 + i))
       .mkString
