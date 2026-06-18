@@ -40,7 +40,10 @@ object PlayerSessionActor:
   def rejected(reason: String, wsOut: pekko.actor.ActorRef): Behavior[Command] =
     Behaviors.setup { _ =>
       wsOut ! TextMessage(s"""{"type":"error","message":"$reason"}""")
-      Behaviors.stopped
+      Behaviors.receiveMessage {
+        case StreamCompleted => Behaviors.stopped
+        case _ => Behaviors.same
+      }
     }
 
   private def active(

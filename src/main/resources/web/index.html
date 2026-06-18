@@ -3,91 +3,108 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TypeRace — Carrera de Mecanografía Multijugador</title>
-  <meta name="description" content="Juego multijugador de carreras de mecanografía y reflejos en tiempo real. ¡Escribe más rápido que tus rivales!" />
+  <title>TypeRace — LP Edición Escudería</title>
+  <meta name="description" content="Juego de carreras de mecanografía y reflejos en tiempo real." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <!-- Usamos Share Tech Mono para darle un look auténtico de terminal / desarrollo estudiantil -->
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet" />
+  
   <style>
     :root {
-      --bg:        #060b18;
-      --surface:   #0d1626;
-      --panel:     #111d35;
-      --border:    #1e3054;
-      --accent:    #00d4ff;
-      --accent2:   #7c3aed;
-      --danger:    #ff3b5c;
-      --ok:        #00e5a0;
-      --warn:      #ffbe0b;
-      --text:      #e8f0fe;
-      --muted:     #6b8ab8;
-      --glow:      rgba(0, 212, 255, 0.35);
-      --glow-r:    rgba(255, 59, 92, 0.40);
+      --bg:        #121318;
+      --surface:   #191b22;
+      --panel:     #222530;
+      --border:    #000000; /* Bordes negros puros para estilo Neo-Brutalista */
+      --accent:    #2ed573; /* Verde terminal brillante */
+      --accent2:   #ff4757; /* Coral intenso */
+      --danger:    #ff4757;
+      --ok:        #2ed573;
+      --warn:      #ffa502;
+      --text:      #f1f2f6;
+      --muted:     #a4b0be;
+      --block-shadow: 5px 5px 0px #000000; /* Sombra dura clásica hecha a mano */
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: "Outfit", system-ui, sans-serif;
+      font-family: "Share Tech Mono", "Outfit", monospace, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* ── Starfield BG ──────────────────────────────────────────────────── */
+    /* Fondo de estrellas pixeladas (manejado por JS) */
     #stars-canvas {
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      opacity: 0.4;
     }
 
     .content { position: relative; z-index: 1; }
 
-    /* ── Header ────────────────────────────────────────────────────────── */
+    /* ── Header Estilo Consola ────────────────────────────────────────── */
     header {
-      padding: 1rem 2rem;
+      padding: 1.2rem 2rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 1rem;
-      background: rgba(13, 22, 38, 0.85);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      border-bottom: 3px solid var(--border);
     }
 
     .logo {
-      display: flex; align-items: center; gap: 0.6rem;
+      display: flex; align-items: center; gap: 0.8rem;
     }
     .logo-icon {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 8px;
+      width: 40px; height: 40px;
+      background: var(--accent);
+      color: #000;
+      border: 2px solid #000;
+      border-radius: 4px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem;
-      box-shadow: 0 0 18px var(--glow);
+      font-size: 1.3rem;
+      font-weight: bold;
+      box-shadow: 3px 3px 0px #000;
+    }
+    .logo-text-group {
+      display: flex;
+      flex-direction: column;
     }
     h1 {
-      font-size: 1.3rem; font-weight: 900; letter-spacing: 0.06em;
-      background: linear-gradient(90deg, var(--accent), #a78bfa);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-size: 1.6rem; font-weight: 900; letter-spacing: 0.02em;
+      color: var(--text);
+    }
+    .group-badge {
+      font-size: 0.75rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .hud {
-      display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.88rem;
+      display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.9rem;
     }
     .hud-item {
       display: flex; flex-direction: column; align-items: center;
-      background: var(--panel); border: 1px solid var(--border);
-      border-radius: 10px; padding: 0.3rem 0.8rem; min-width: 70px;
+      background: var(--panel); 
+      border: 2px solid var(--border);
+      border-radius: 4px; 
+      padding: 0.4rem 1rem; 
+      min-width: 85px;
+      box-shadow: 3px 3px 0px #000;
     }
-    .hud-label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; }
-    .hud-value { color: var(--accent); font-weight: 700; font-size: 1.05rem; margin-top: 1px; }
+    .hud-label { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; }
+    .hud-value { color: var(--accent); font-weight: 700; font-size: 1.1rem; margin-top: 2px; }
     .hud-value.danger { color: var(--danger); }
     .hud-value.ok { color: var(--ok); }
 
     /* ── Main layout ───────────────────────────────────────────────────── */
     main {
-      padding: 1.5rem 2rem 3rem;
+      padding: 2rem;
       max-width: 1200px;
       margin: 0 auto;
     }
@@ -95,72 +112,74 @@
     /* ── Join panel ────────────────────────────────────────────────────── */
     #join-panel {
       background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
+      border: 3px solid var(--border);
+      border-radius: 6px;
       padding: 1.5rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
       display: flex;
-      gap: 1rem;
+      gap: 1.2rem;
       align-items: center;
       flex-wrap: wrap;
+      box-shadow: var(--block-shadow);
     }
     #join-panel label {
-      color: var(--muted); font-size: 0.85rem; margin-right: -0.5rem;
+      color: var(--text); font-size: 1rem; font-weight: bold;
     }
 
     input {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: var(--bg);
+      border: 2px solid var(--border);
       color: var(--text);
-      border-radius: 10px;
+      border-radius: 4px;
       padding: 0.6rem 1rem;
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-family: inherit;
-      transition: border-color 0.2s, box-shadow 0.2s;
       outline: none;
     }
     input:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+      background: #1c1e26;
     }
 
+    /* Botones Neo-Brutalistas: Se hunden físicamente al hacer click */
     .btn {
       cursor: pointer;
-      border: none;
-      border-radius: 10px;
-      padding: 0.6rem 1.4rem;
-      font-size: 0.95rem;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      padding: 0.6rem 1.5rem;
+      font-size: 1rem;
       font-family: inherit;
       font-weight: 700;
-      letter-spacing: 0.03em;
-      transition: all 0.2s;
+      text-transform: uppercase;
+      box-shadow: 3px 3px 0px #000;
+      transition: transform 0.05s, box-shadow 0.05s;
     }
     .btn-primary {
-      background: linear-gradient(135deg, #0284c7 0%, #7c3aed 100%);
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(0, 132, 199, 0.30);
+      background: var(--accent);
+      color: #000;
     }
     .btn-primary:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(0, 132, 199, 0.45);
+      background: #22be63;
     }
     .btn-success {
-      background: linear-gradient(135deg, #00b890 0%, #00e5a0 100%);
-      color: #001a12;
-      box-shadow: 0 4px 16px rgba(0, 229, 160, 0.30);
+      background: #ffbc06;
+      color: #000;
     }
     .btn-success:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(0, 229, 160, 0.45);
+      background: #e0a300;
     }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+    .btn:active:not(:disabled) {
+      transform: translate(3px, 3px);
+      box-shadow: 0px 0px 0px #000;
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: 3px 3px 0px #000 !important; }
 
     #status-bar {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.55rem 1rem;
-      font-size: 0.88rem;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
       color: var(--muted);
       flex: 1;
       min-width: 200px;
@@ -170,70 +189,124 @@
     #target-panel {
       position: relative;
       text-align: center;
-      padding: 1.75rem 2rem;
-      margin-bottom: 1.5rem;
-      border-radius: 18px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border-radius: 6px;
       background: var(--panel);
-      border: 1px solid var(--border);
-      overflow: hidden;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    #target-panel::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at center, rgba(0,212,255,0.06) 0%, transparent 70%);
-      pointer-events: none;
+      border: 3px solid var(--border);
+      box-shadow: var(--block-shadow);
     }
     #target-panel.locked {
       border-color: var(--danger);
-      box-shadow: 0 0 40px var(--glow-r);
-    }
-    #target-panel.locked::before {
-      background: radial-gradient(ellipse at center, rgba(255,59,92,0.12) 0%, transparent 70%);
+      background: #2a181b;
     }
 
     #target-label {
       color: var(--muted);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
       margin-bottom: 0.5rem;
     }
     #target-value {
-      font-family: "JetBrains Mono", "Consolas", monospace;
-      font-size: clamp(2.2rem, 7vw, 4rem);
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
       font-weight: 700;
-      letter-spacing: 0.04em;
-      background: linear-gradient(90deg, #e8f0fe, var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      transition: all 0.2s;
+      color: #fff;
       word-break: break-all;
-    }
-    #target-panel.locked #target-value {
-      background: linear-gradient(90deg, var(--danger), #ff8fa3);
-      -webkit-background-clip: text;
     }
 
     .lock-overlay {
       display: none;
       position: absolute;
       inset: 0;
-      background: rgba(255, 59, 92, 0.08);
-      border-radius: 18px;
+      background: rgba(255, 71, 87, 0.15);
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: var(--danger);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      animation: pulse-lock 0.5s ease-in-out infinite alternate;
+      text-shadow: 2px 2px 0px #000;
     }
     #target-panel.locked .lock-overlay { display: flex; }
-    @keyframes pulse-lock {
-      from { opacity: 0.6; } to { opacity: 1; }
+
+    .round-badge {
+      display: inline-block;
+      background: #000;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    /* ── Race canvas ───────────────────────────────────────────────────── */
+    #race-canvas-wrap {
+      border-radius: 6px;
+      border: 3px solid var(--border);
+      overflow: hidden;
+      background: #0f1015;
+      box-shadow: var(--block-shadow);
+    }
+    canvas#raceCanvas {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* ── Winner overlay ────────────────────────────────────────────────── */
+    #winner-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.8);
+      align-items: center;
+      justify-content: center;
+    }
+    #winner-overlay.show { display: flex; }
+    .winner-card {
+      background: var(--panel);
+      border: 4px solid var(--border);
+      border-radius: 8px;
+      padding: 3rem;
+      text-align: center;
+      box-shadow: 8px 8px 0px #000;
+      max-width: 450px;
+      width: 90%;
+    }
+    .winner-trophy { font-size: 4.5rem; margin-bottom: 1rem; }
+    .winner-title { font-size: 1rem; color: var(--accent); text-transform: uppercase; }
+    .winner-name {
+      font-size: 3rem; font-weight: 900; margin: 0.5rem 0;
+      color: #fff;
+    }
+    .winner-score { font-size: 1.3rem; color: var(--muted); margin-bottom: 1rem; }
+    .btn-restart { margin-top: 1rem; width: 100%; }
+
+    /* ── Countdown overlay ─────────────────────────────────────────────── */
+    #countdown-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      background: rgba(0,0,0,0.3);
+    }
+    #countdown-overlay.show { display: flex; }
+    #countdown-num {
+      font-size: 10rem;
+      font-weight: 900;
+      color: #ffbc06;
+      text-shadow: 5px 5px 0px #000;
+    }
+
+    @media (max-width: 640px) {
+      main { padding: 1rem; }
+      header { padding: 1rem; }
+      #join-panel { padding: 1rem; }
     }
 
     @keyframes shake-debuff {
@@ -249,121 +322,26 @@
       90% { transform: translate(1px, 2px) rotate(0deg); }
       100% { transform: translate(1px, -2px) rotate(-1deg); }
     }
+    
     .debuff-shake {
-      animation: shake-debuff 0.2s infinite;
-      filter: hue-rotate(-50deg) blur(1px);
-    }
-
-    .round-badge {
-      display: inline-block;
-      background: linear-gradient(135deg, var(--accent2), #a855f7);
-      color: #fff;
-      border-radius: 20px;
-      padding: 0.2rem 0.75rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-    }
-
-    /* ── Race canvas ───────────────────────────────────────────────────── */
-    #race-canvas-wrap {
-      border-radius: 18px;
-      border: 1px solid var(--border);
-      overflow: hidden;
-      background: #040a14;
-      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-    }
-    canvas#raceCanvas {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    /* ── Winner overlay ────────────────────────────────────────────────── */
-    #winner-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 100;
-      background: rgba(6, 11, 24, 0.85);
-      backdrop-filter: blur(8px);
-      align-items: center;
-      justify-content: center;
-    }
-    #winner-overlay.show { display: flex; }
-    .winner-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 3rem 4rem;
-      text-align: center;
-      animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 0 80px rgba(0, 229, 160, 0.25);
-    }
-    @keyframes pop-in {
-      from { transform: scale(0.7); opacity: 0; }
-      to   { transform: scale(1);   opacity: 1; }
-    }
-    .winner-trophy { font-size: 4rem; margin-bottom: 0.5rem; }
-    .winner-title { font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; }
-    .winner-name {
-      font-size: 2.5rem; font-weight: 900; margin: 0.3rem 0 0.2rem;
-      background: linear-gradient(90deg, var(--ok), var(--accent));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .winner-score { font-size: 1.1rem; color: var(--muted); }
-    .btn-restart { margin-top: 1.5rem; }
-
-    /* ── Countdown overlay ─────────────────────────────────────────────── */
-    #countdown-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 99;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-    }
-    #countdown-overlay.show { display: flex; }
-    #countdown-num {
-      font-size: 12rem;
-      font-weight: 900;
-      color: var(--accent);
-      text-shadow: 0 0 80px var(--glow);
-      animation: countdown-pop 0.8s ease-out;
-    }
-    @keyframes countdown-pop {
-      0%   { transform: scale(2); opacity: 0; }
-      50%  { transform: scale(1); opacity: 1; }
-      100% { transform: scale(0.9); opacity: 0; }
-    }
-
-    /* ── Streak badge ──────────────────────────────────────────────────── */
-    .streak-fire {
-      display: inline-flex; gap: 0.2rem; align-items: center;
-    }
-
-    /* ── Responsive ────────────────────────────────────────────────────── */
-    @media (max-width: 640px) {
-      main { padding: 1rem; }
-      header { padding: 0.75rem 1rem; }
-      #join-panel { padding: 1rem; }
-      .winner-card { padding: 2rem 1.5rem; }
+      animation: shake-debuff 0.5s cubic-bezier(.36,.07,.19,.97) both;
+      filter: blur(1px) sepia(0.5) hue-rotate(-30deg);
     }
   </style>
 </head>
 <body>
-  <!-- Starfield canvas -->
   <canvas id="stars-canvas"></canvas>
 
   <div class="content">
-    <!-- ── Header ───────────────────────────────────────────── -->
+    <!-- ── Cabecera Personalizada de Estudiante ─────────────────────── -->
     <header>
       <div class="logo">
         <div class="logo-icon">⌨</div>
-        <h1>TypeRace</h1>
+        <div class="logo-text-group">
+          <h1>TypeRace.exe</h1>
+          <!-- Remplaza esto con el nombre real de tu grupo o materia -->
+          <span class="group-badge">[ PROYECTO LP - GRUPO 04 ]</span>
+        </div>
       </div>
       <div class="hud">
         <div class="hud-item">
@@ -386,7 +364,7 @@
           <span class="hud-label">Estado</span>
           <span class="hud-value" id="gameStatus">Off</span>
         </div>
-        <div class="hud-item" style="border-color: var(--accent2)">
+        <div class="hud-item">
           <span class="hud-label">Poder</span>
           <span class="hud-value" id="powerUp">—</span>
         </div>
@@ -394,51 +372,51 @@
     </header>
 
     <main>
-      <!-- ── Join panel ──────────────────────────────────────── -->
+      <!-- ── Panel de Control ─────────────────────────────────────── -->
       <div id="join-panel">
-        <label for="nameInput">Nombre:</label>
-        <input id="nameInput" type="text" placeholder="Tu apodo" maxlength="20" autocomplete="off" />
-        <button id="connectBtn" class="btn btn-primary">🔌 Conectar</button>
-        <button id="startBtn" class="btn btn-success" disabled>🏁 Iniciar Partida</button>
-        <div id="status-bar">Introduce tu nombre y conéctate al servidor.</div>
+        <label for="nameInput">Usuario:</label>
+        <input id="nameInput" type="text" placeholder="Ingresa tu Nick" maxlength="20" autocomplete="off" />
+        <button id="connectBtn" class="btn btn-primary">🔌 Unirse al lobby</button>
+        <button id="startBtn" class="btn btn-success" disabled>🏁 Iniciar la carrera</button>
+        <div id="status-bar">Introduce tu nombre y únete a la carrera.</div>
       </div>
 
-      <!-- ── Target panel ────────────────────────────────────── -->
+      <!-- ── Panel de Palabra Objetivo ───────────────────────────── -->
       <div id="target-panel">
-        <div class="round-badge" id="roundBadge">Ronda 1 · Flechas</div>
-        <div id="target-label">OBJETIVO A TECLEAR</div>
+        <div class="round-badge" id="roundBadge">Ronda 1 · Flechitas</div>
+        <div id="target-label">oÑo</div>
         <div id="target-value">—</div>
-        <div class="lock-overlay">🔒 BLOQUEADO 1s</div>
+        <div class="lock-overlay">🔒 BLOQUEADO (Te equivocaste tont@)</div>
       </div>
 
-      <!-- ── Race canvas ─────────────────────────────────────── -->
+      <!-- ── Pista del Juego (Canvas) ─────────────────────────────── -->
       <div id="race-canvas-wrap">
         <canvas id="raceCanvas" width="1100" height="420"></canvas>
       </div>
     </main>
   </div>
 
-  <!-- ── Winner overlay ───────────────────────────────────────── -->
+  <!-- ── Pantalla de Ganador ──────────────────────────────────── -->
   <div id="winner-overlay">
     <div class="winner-card">
-      <div class="winner-trophy">🏆</div>
-      <div class="winner-title">¡Ganador!</div>
+      <div class="winner-trophy">👑</div>
+      <div class="winner-title">¡Ganaste!</div>
       <div class="winner-name" id="winner-name">—</div>
       <div class="winner-score" id="winner-score"></div>
       <button class="btn btn-primary btn-restart" onclick="document.getElementById('winner-overlay').classList.remove('show')">
-        Cerrar
+        Aceptar
       </button>
     </div>
   </div>
 
-  <!-- ── Countdown overlay ─────────────────────────────────────── -->
+  <!-- ── Cuenta Regresiva ─────────────────────────────────────── -->
   <div id="countdown-overlay">
     <div id="countdown-num"></div>
   </div>
 
   <script>
     /* ═══════════════════════════════════════════════════════════════════
-       STARFIELD
+       FONDO DE ESTRELLAS PIXELADAS (Modificado para look retro)
     ═══════════════════════════════════════════════════════════════════ */
     (function () {
       const c = document.getElementById("stars-canvas");
@@ -447,23 +425,22 @@
       function resize() {
         c.width = window.innerWidth;
         c.height = window.innerHeight;
-        stars = Array.from({ length: 180 }, () => ({
+        stars = Array.from({ length: 100 }, () => ({
           x: Math.random() * c.width,
           y: Math.random() * c.height,
-          r: Math.random() * 1.5 + 0.3,
+          size: Math.random() * 2 + 1, // Estrellas cuadradas más grandes
           a: Math.random(),
-          speed: Math.random() * 0.004 + 0.001,
+          speed: Math.random() * 0.01 + 0.005,
         }));
       }
       function draw(t) {
         ctx.clearRect(0, 0, c.width, c.height);
         stars.forEach(s => {
           s.a += s.speed;
-          const alpha = (Math.sin(s.a) * 0.5 + 0.5) * 0.8 + 0.1;
-          ctx.beginPath();
-          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(180,210,255,${alpha})`;
-          ctx.fill();
+          const alpha = (Math.sin(s.a) * 0.5 + 0.5) * 0.7 + 0.3;
+          ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+          // Dibujamos cuadrados en lugar de círculos perfectos para simular pixeles
+          ctx.fillRect(s.x, s.y, s.size, s.size);
         });
         requestAnimationFrame(draw);
       }
@@ -473,7 +450,7 @@
     })();
 
     /* ═══════════════════════════════════════════════════════════════════
-       GAME STATE & WS
+       LÓGICA DEL JUEGO Y WEBSOCKET (Mantiene intactas tus variables de Scala)
     ═══════════════════════════════════════════════════════════════════ */
     const canvas       = document.getElementById("raceCanvas");
     const ctx          = canvas.getContext("2d");
@@ -494,18 +471,18 @@
     let ws = null, selfId = null, lastState = null, connected = false;
     let prevRound = 0;
 
+    // Paleta de competidores sólida y estridente (estilo arcade clásico de 8 bits)
     const LANE_COLORS = [
-      ["#00d4ff","#0090c0"],
-      ["#a855f7","#7c3aed"],
-      ["#f472b6","#db2777"],
-      ["#34d399","#059669"],
-      ["#fbbf24","#d97706"],
-      ["#60a5fa","#2563eb"],
-      ["#fb7185","#be123c"],
-      ["#4ade80","#16a34a"],
+      ["#2ed573","#26af5f"],
+      ["#ff4757","#e83e4c"],
+      ["#1e90ff","#1a7cd9"],
+      ["#ffa502","#e69502"],
+      ["#9b59b6","#884ea0"],
+      ["#1abc9c","#16a085"],
+      ["#e67e22","#d35400"],
+      ["#f1c40f","#f39c12"],
     ];
 
-    /* ─── Helpers ─────────────────────────────────── */
     function formatTime(ms) {
       const s = Math.max(0, Math.ceil(ms / 1000));
       return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
@@ -518,39 +495,39 @@
     function displayTarget(p, roundKind) {
       if (!p) return "—";
       const t = p.currentTarget || "—";
-      if (roundKind === "Words" && p.targetProgress > 0 && t.length > 1) {
+      if (roundKind === "Words" && t.length > 1) {
         const done = t.slice(0, p.targetProgress);
         const cur  = t[p.targetProgress] ?? "";
         const rest = t.slice(p.targetProgress + 1);
-        return `<span style="color:var(--ok);text-shadow:0 0 12px rgba(0,229,160,.6)">${done}</span>` +
-               `<span style="color:var(--accent);text-decoration:underline">${cur}</span>` +
-               `<span style="opacity:.45">${rest}</span>`;
+        return `<span style="color:var(--ok); font-weight: bold;">${done}</span>` +
+               `<span style="color:#ffbc06; text-decoration: underline; font-weight: bold;">${cur}</span>` +
+               `<span style="opacity:.4">${rest}</span>`;
       }
       if (roundKind === "Arrows") {
         const map = { UP: "↑", DOWN: "↓", LEFT: "←", RIGHT: "→" };
-        return `<span style="font-size:1.4em">${map[t] ?? t}</span>`;
+        return `<span>${map[t] ?? t}</span>`;
       }
       return `<span>${t}</span>`;
     }
 
-    /* ─── Canvas race ─────────────────────────────── */
+    /* ─── Renderizado en Pista (Canvas) ─────────────────────────────── */
     function drawRace(state) {
       if (!state) return;
       const players = state.players ?? [];
       const W = canvas.width, H = canvas.height;
       ctx.clearRect(0, 0, W, H);
 
-      // Background grid lines
-      ctx.strokeStyle = "rgba(30,48,84,0.4)";
-      ctx.lineWidth = 1;
-      for (let x = 0; x < W; x += 80) {
+      // Rejilla de fondo (Grid estilo retro cyber-punk)
+      ctx.strokeStyle = "rgba(63, 63, 70, 0.25)";
+      ctx.lineWidth = 2;
+      for (let x = 0; x < W; x += 50) {
         ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
       }
 
       const n      = Math.max(players.length, 1);
       const laneH  = Math.floor((H - 30) / n);
       const maxSc  = Math.max(50, ...players.map(p => p.score), 1);
-      const PAD_L  = 160, PAD_R = 40;
+      const PAD_L  = 180, PAD_R = 50;
       const trackW = W - PAD_L - PAD_R;
 
       players.forEach((p, i) => {
@@ -560,98 +537,76 @@
         const [clr1, clr2] = LANE_COLORS[i % LANE_COLORS.length];
         const isSelf  = p.id === selfId;
 
-        // Track lane
-        const trackGrad = ctx.createLinearGradient(PAD_L, 0, W - PAD_R, 0);
-        trackGrad.addColorStop(0, "rgba(30,48,84,0.3)");
-        trackGrad.addColorStop(1, "rgba(30,48,84,0.05)");
-        ctx.fillStyle = trackGrad;
+        // Carril plano con borde negro
+        ctx.fillStyle = "rgba(25, 27, 34, 0.8)";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(PAD_L, yCenter - 6, trackW, 12, 6);
+        ctx.rect(PAD_L, yCenter - 10, trackW, 20);
         ctx.fill();
+        ctx.stroke();
 
-        // Progress fill
+        // Relleno de progreso plano
         if (pct > 0) {
-          const progGrad = ctx.createLinearGradient(PAD_L, 0, carX, 0);
-          progGrad.addColorStop(0, clr2 + "44");
-          progGrad.addColorStop(1, clr1 + "88");
-          ctx.fillStyle = progGrad;
+          ctx.fillStyle = clr1;
           ctx.beginPath();
-          ctx.roundRect(PAD_L, yCenter - 5, pct * trackW, 10, 5);
+          ctx.rect(PAD_L, yCenter - 9, pct * trackW, 18);
           ctx.fill();
         }
 
-        // Finish flag strip
-        ctx.fillStyle = "rgba(255,255,255,0.07)";
-        ctx.fillRect(W - PAD_R - 4, yCenter - 12, 4, 24);
-
-        // Glow behind car
-        if (isSelf || pct > 0.02) {
-          const glowRad = ctx.createRadialGradient(carX, yCenter, 0, carX, yCenter, 36);
-          glowRad.addColorStop(0, clr1 + "55");
-          glowRad.addColorStop(1, "transparent");
-          ctx.fillStyle = glowRad;
-          ctx.beginPath();
-          ctx.arc(carX, yCenter, 36, 0, Math.PI * 2);
-          ctx.fill();
+        // Meta (Línea discontinua rígida)
+        ctx.fillStyle = "#ffffff";
+        for (let y = yCenter - 10; y < yCenter + 10; y += 5) {
+          if ((y % 10) === 0) ctx.fillRect(W - PAD_R, y, 4, 5);
         }
 
-        // Car body (rounded rect)
-        const carW = isSelf ? 50 : 44, carHh = isSelf ? 22 : 18;
-        const carGrad = ctx.createLinearGradient(carX - carW/2, yCenter - carHh/2, carX - carW/2, yCenter + carHh/2);
-        carGrad.addColorStop(0, clr1);
-        carGrad.addColorStop(1, clr2);
-        ctx.fillStyle = carGrad;
+        // Vehículo (Bloque rectangular sólido - Cero IA suavizada)
+        const carW = isSelf ? 46 : 40, carH = isSelf ? 20 : 16;
+        ctx.fillStyle = isSelf ? "#ffffff" : clr1;
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.roundRect(carX - carW / 2, yCenter - carHh / 2, carW, carHh, 8);
+        ctx.rect(carX - carW/2, yCenter - carH/2, carW, carH);
         ctx.fill();
+        ctx.stroke();
 
-        // Windshield highlight
-        ctx.fillStyle = "rgba(255,255,255,0.25)";
-        ctx.beginPath();
-        ctx.roundRect(carX - carW / 2 + 4, yCenter - carHh / 2 + 3, carW - 18, carHh / 2 - 3, 4);
-        ctx.fill();
+        // Cabina interna del coche
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(carX + (carW/2) - 14, yCenter - (carH/2) + 3, 8, carH - 6);
 
-        // Lock ring
+        // Alerta de bloqueo por error
         if (p.isLocked) {
           ctx.strokeStyle = "var(--danger)";
           ctx.lineWidth = 3;
-          ctx.setLineDash([4, 4]);
           ctx.beginPath();
-          ctx.roundRect(carX - carW / 2 - 4, yCenter - carHh / 2 - 4, carW + 8, carHh + 8, 11);
+          ctx.rect(carX - carW / 2 - 4, yCenter - carH / 2 - 4, carW + 8, carH + 8);
           ctx.stroke();
-          ctx.setLineDash([]);
         }
 
-        // Self highlight ring
-        if (isSelf) {
-          ctx.strokeStyle = "#fff";
-          ctx.lineWidth = 2;
-          ctx.globalAlpha = 0.5;
-          ctx.beginPath();
-          ctx.roundRect(carX - carW / 2 - 3, yCenter - carHh / 2 - 3, carW + 6, carHh + 6, 10);
-          ctx.stroke();
-          ctx.globalAlpha = 1;
-        }
-
-        // Player name label
-        ctx.fillStyle = isSelf ? "#f8fafc" : "#94a3b8";
-        ctx.font = `${isSelf ? "700" : "600"} 13px "Outfit", sans-serif`;
+        // Etiqueta del jugador con tipografía monospace
+        ctx.fillStyle = isSelf ? varColorToString("--accent") : "#ffffff";
+        ctx.font = `bold 14px "Share Tech Mono", monospace`;
         ctx.textBaseline = "middle";
-        ctx.fillText(`${p.displayName}`, 8, yCenter - 6);
-        ctx.fillStyle = isSelf ? clr1 : "#6b8ab8";
-        ctx.font = `600 11px "Outfit", sans-serif`;
-        ctx.fillText(`${p.score} pts`, 8, yCenter + 8);
+        ctx.fillText(`${p.displayName}`, 10, yCenter - 6);
+        
+        ctx.fillStyle = "#a4b0be";
+        ctx.font = `12px "Share Tech Mono", monospace`;
+        ctx.fillText(`${p.score} PTS`, 10, yCenter + 8);
 
-        // Streak badge
+        // Contador de racha
         if (p.streak >= 2) {
-          ctx.fillStyle = "#fbbf24";
-          ctx.font = "bold 11px sans-serif";
-          ctx.fillText(`🔥×${p.streak}`, carX - 14, yCenter - carHh / 2 - 8);
+          ctx.fillStyle = "#ffbc06";
+          ctx.font = "bold 13px sans-serif";
+          ctx.fillText(`🔥×${p.streak}`, carX - 15, yCenter - carH / 2 - 6);
         }
       });
     }
 
-    /* ─── State application ───────────────────────── */
+    function varColorToString(varName) {
+      return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    }
+
+    /* ─── Gestión de Estados Reales ───────────────────────── */
     function applyState(msg) {
       const s    = msg.state;
       lastState  = s;
@@ -667,7 +622,6 @@
       roundKindEl.textContent = roundKindLabel(s.roundKind);
       roundBadge.textContent = `Ronda ${s.round} · ${roundKindLabel(s.roundKind)}`;
 
-      // Trigger countdown when round changes
       if (s.round !== prevRound && s.isRunning) {
         showCountdown(s.round);
         prevRound = s.round;
@@ -675,7 +629,6 @@
         prevRound = s.round;
       }
 
-      // Target
       targetValue.innerHTML = displayTarget(me, s.roundKind);
       if (me?.isLocked) {
         targetPanel.classList.add("locked");
@@ -685,7 +638,6 @@
         document.body.classList.remove("debuff-shake");
       }
 
-      // PowerUp
       if (me?.powerUp) {
         powerUpEl.textContent = `${me.powerUp} (ESPACIO)`;
         powerUpEl.className = "hud-value ok";
@@ -696,43 +648,41 @@
         powerUpEl.style.textShadow = "none";
       }
 
-      // Game status
       if (s.isFinished) {
-        gameStatusEl.textContent = "FIN";
-        gameStatusEl.className   = "hud-value ok";
+        gameStatusEl.textContent = "TERMINADO";
+        gameStatusEl.className   = "hud-value danger";
         startBtn.disabled        = true;
         const winner = s.players.find(p => p.id === s.winnerId);
         if (winner) {
           document.getElementById("winner-name").textContent  = winner.displayName;
-          document.getElementById("winner-score").textContent = `${winner.score} puntos`;
+          document.getElementById("winner-score").textContent = `${winner.score} puntos acumulados`;
           document.getElementById("winner-overlay").classList.add("show");
         }
-        statusBar.textContent = "¡Partida finalizada!";
+        statusBar.textContent = "Partida finalizada de forma síncrona.";
       } else if (s.isRunning) {
-        gameStatusEl.textContent = "EN JUEGO";
+        gameStatusEl.textContent = "RUNNING";
         gameStatusEl.className   = "hud-value ok";
         startBtn.disabled        = true;
-        statusBar.textContent    = "¡Escribe el objetivo lo más rápido posible!";
+        statusBar.textContent    = "Capturando teclas activas... ¡Escribe rápido!";
       } else {
-        gameStatusEl.textContent = "Lobby";
+        gameStatusEl.textContent = "LOBBY";
         gameStatusEl.className   = "hud-value";
         startBtn.disabled        = !connected || s.players.length === 0;
-        statusBar.textContent    = `${s.players.length} jugador(es) en el lobby. Pulsa Iniciar para comenzar.`;
+        statusBar.textContent    = `[${s.players.length}] jugadores listos. El host debe iniciar la rutina.`;
       }
     }
 
-    /* ─── Countdown animation ─────────────────────── */
     function showCountdown(round) {
       const overlay = document.getElementById("countdown-overlay");
       const numEl   = document.getElementById("countdown-num");
       overlay.classList.add("show");
-      numEl.textContent = round > 1 ? `Ronda ${round}` : "¡GO!";
+      numEl.textContent = round > 1 ? `ROUND ${round}` : "¡START!";
       setTimeout(() => overlay.classList.remove("show"), 900);
     }
 
-    /* ─── WebSocket ───────────────────────────────── */
+    /* ─── Configuración de Eventos del Cliente ───────────────────────── */
     function connect() {
-      const name     = (nameInput.value || "Jugador").trim();
+      const name     = (nameInput.value || "User_Anon").trim();
       const protocol = location.protocol === "https:" ? "wss:" : "ws:";
       ws = new WebSocket(`${protocol}//${location.host}/ws?name=${encodeURIComponent(name)}`);
 
@@ -740,8 +690,8 @@
         connected          = true;
         connectBtn.disabled = true;
         nameInput.disabled  = true;
-        gameStatusEl.textContent = "Lobby";
-        statusBar.textContent    = "Conectado. Esperando jugadores…";
+        gameStatusEl.textContent = "LOBBY";
+        statusBar.textContent    = "Socket abierto de forma exitosa. Esperando directivas del servidor...";
       };
 
       ws.onmessage = ev => {
@@ -750,14 +700,13 @@
           if (msg.type === "state") applyState(msg);
           if (msg.type === "error") {
             statusBar.textContent = "⚠️ " + msg.message;
-            // Restaurar estado del botón para que el usuario pueda reconectarse
             connected           = false;
             connectBtn.disabled = false;
             nameInput.disabled  = false;
             startBtn.disabled   = true;
           }
         } catch (e) {
-          console.warn("Mensaje inválido", e);
+          console.warn("Payload corrupto o inválido", e);
         }
       };
 
@@ -766,13 +715,13 @@
         connectBtn.disabled  = false;
         nameInput.disabled   = false;
         startBtn.disabled    = true;
-        gameStatusEl.textContent = "Off";
+        gameStatusEl.textContent = "OFFLINE";
         gameStatusEl.className   = "hud-value danger";
-        statusBar.textContent    = "Conexión cerrada. Puedes reconectarte.";
+        statusBar.textContent    = "Conexión terminada. Servidor fuera de línea.";
       };
 
       ws.onerror = () => {
-        statusBar.textContent = "Error de conexión WebSocket.";
+        statusBar.textContent = "Fallo crítico en el túnel WebSockets.";
       };
     }
 
@@ -781,7 +730,6 @@
       ws.send(JSON.stringify({ type: "input", key }));
     }
 
-    /* ─── Events ──────────────────────────────────── */
     connectBtn.addEventListener("click", connect);
     startBtn.addEventListener("click", () => {
       if (ws?.readyState === WebSocket.OPEN)
@@ -795,13 +743,12 @@
     window.addEventListener("keydown", ev => {
       if (!connected || !lastState?.isRunning) return;
       if (ev.target === nameInput) return;
-      if (ev.key === " ") ev.preventDefault(); // Prevent scrolling on space
+      if (ev.key === " ") ev.preventDefault();
       else if (ev.key.length > 1 && ev.key !== "ArrowUp" && ev.key !== "ArrowDown" && ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
       ev.preventDefault();
       sendInput(ev.key);
     });
 
-    /* ─── Render loop ─────────────────────────────── */
     (function loop() {
       if (lastState) drawRace(lastState);
       requestAnimationFrame(loop);
