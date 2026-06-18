@@ -48,9 +48,14 @@ final case class GameState(
 
 object GameConfig:
   val TotalRounds: Int           = 3
-  val RoundDurationMs: Long      = 60_000L
   val BasePoints: Int            = 10
   val LockDurationMs: Long       = 1_000L
   val MaxPlayers: Int            = 8
+
+  def roundDurationMs(round: Int): Long = round match
+    case 1 => 15_000L
+    case 2 => 20_000L
+    case 3 => 30_000L
+    case _ => 30_000L
 
   def roundKind(round: Int): RoundKind = RoundKind.fromRound(round)

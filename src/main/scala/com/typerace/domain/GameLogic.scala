@@ -6,7 +6,7 @@ object GameLogic:
   def initialState(seed: Long): GameState =
     GameState(
       round = 1,
-      timeRemainingMs = GameConfig.RoundDurationMs,
+      timeRemainingMs = GameConfig.roundDurationMs(1),
       players = Map.empty,
       isRunning = false,
       isFinished = false,
@@ -28,7 +28,7 @@ object GameLogic:
         else
           state.copy(
             isRunning = true,
-            timeRemainingMs = GameConfig.RoundDurationMs,
+            timeRemainingMs = GameConfig.roundDurationMs(state.round),
             players = state.players.map { case (id, p) => id -> assignNewTarget(p, state.round, state.seed) }
           )
 
@@ -96,7 +96,7 @@ object GameLogic:
         player.currentTarget.equalsIgnoreCase(key)
 
       case RoundKind.Words =>
-        val expected = player.currentTarget.lift(player.targetProgress).map(_.toLower).getOrElse("")
+        val expected = player.currentTarget.lift(player.targetProgress).map(_.toString.toLowerCase).getOrElse("")
         key.length == 1 && key.toLowerCase == expected
 
   private def onCorrectHit(player: PlayerState, state: GameState): PlayerState =
@@ -154,7 +154,7 @@ object GameLogic:
     val nextRound = state.round + 1
     state.copy(
       round = nextRound,
-      timeRemainingMs = GameConfig.RoundDurationMs,
+      timeRemainingMs = GameConfig.roundDurationMs(nextRound),
       players = state.players.map { case (id, p) =>
         id -> assignNewTarget(p.copy(streak = 0, lockedUntil = None), nextRound, state.seed)
       }
