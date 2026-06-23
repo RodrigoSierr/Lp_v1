@@ -1,6 +1,6 @@
 package com.typerace.actor
 
-import com.typerace.domain.GameJson
+import com.typerace.domain.{GameJson, GameMode}
 import io.circe.parser.decode
 import org.apache.pekko
 import org.apache.pekko.actor.typed.{ActorRef, Behavior}
@@ -57,13 +57,22 @@ object PlayerSessionActor:
         msg match
           case FromWebSocket(text) =>
             decode[GameJson.InboundMessage](text).foreach {
-              case GameJson.InboundMessage("input", Some(key)) if key == " " =>
-                gameManager ! GameManagerActor.UsePowerUp(playerId)
 
-              case GameJson.InboundMessage("input", Some(key)) =>
+              // ── Usar un poder por nombre (Freeze/Scramble/Hack desde Numpad, Cleanse desde Space) ──
+              case GameJson.InboundMessage("use_power", _, Some(power), _) =>
+                gameManager ! GameManagerActor.UsePowerUp(playerId, power)
+
+              // ── Cambiar modo de juego desde el lobby ──────────────────────────────────────
+              case GameJson.InboundMessage("set_mode", _, _, Some(mode)) =>
+                val gameMode = if mode == "LivesBased" then GameMode.LivesBased else GameMode.TimeBased
+                gameManager ! GameManagerActor.SetGameMode(gameMode)
+
+              // ── Input de teclado normal ───────────────────────────────────────────────────
+              case GameJson.InboundMessage("input", Some(key), _, _) =>
                 gameManager ! GameManagerActor.PlayerKeyInput(playerId, key)
 
-              case GameJson.InboundMessage("start", _) =>
+              // ── Inicio de partida ─────────────────────────────────────────────────────────
+              case GameJson.InboundMessage("start", _, _, _) =>
                 gameManager ! GameManagerActor.StartGame
 
               case other =>

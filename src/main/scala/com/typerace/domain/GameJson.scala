@@ -16,14 +16,21 @@ object GameJson:
   given Decoder[GameEvent.PlayerInput] = deriveDecoder
 
   // ── Mensajes de entrada desde el browser ──────────────────────────────────
-  final case class InboundMessage(tpe: String, key: Option[String] = None)
+  final case class InboundMessage(
+      tpe: String,
+      key: Option[String]   = None,
+      power: Option[String] = None,  // Para mensajes "use_power"
+      mode: Option[String]  = None   // Para mensajes "set_mode"
+  )
 
   object InboundMessage:
     given Decoder[InboundMessage] = Decoder.instance { c =>
       for
         t <- c.downField("type").as[String]
         k <- c.downField("key").as[Option[String]]
-      yield InboundMessage(t, k)
+        p <- c.downField("power").as[Option[String]]
+        m <- c.downField("mode").as[Option[String]]
+      yield InboundMessage(t, k, p, m)
     }
 
   // ── Mensaje de salida hacia el browser ────────────────────────────────────
