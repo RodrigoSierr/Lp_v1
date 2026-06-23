@@ -1,6 +1,6 @@
 package com.typerace.actor
 
-import com.typerace.domain.{GameConfig, GameEvent, GameLogic, GameState, GameJson}
+import com.typerace.domain.{GameConfig, GameEvent, GameLogic, GameMode, GameState, GameJson}
 import org.apache.pekko.actor.typed.{ActorRef, Behavior}
 import org.apache.pekko.actor.typed.scaladsl.{ActorContext, Behaviors, TimerScheduler}
 
@@ -22,7 +22,12 @@ object GameManagerActor:
   final case class Unregister(playerId: String) extends Command
 
   final case class PlayerKeyInput(playerId: String, key: String) extends Command
-  final case class UsePowerUp(playerId: String) extends Command
+
+  /** Activar un poder específico por nombre: "Freeze", "Scramble", "Hack" o "Cleanse". */
+  final case class UsePowerUp(playerId: String, power: String) extends Command
+
+  /** Cambiar el modo de juego desde el lobby. */
+  final case class SetGameMode(mode: GameMode) extends Command
 
   final case object StartGame extends Command
 
@@ -115,17 +120,34 @@ object GameManagerActor:
               running(ctx, next)
             else Behaviors.same
 
-          case UsePowerUp(playerId) =>
+          // ── Uso de poder con nombre explícito ─────────────────────────────
+          case UsePowerUp(playerId, power) =>
             val now     = System.currentTimeMillis()
             val updated = GameLogic.updateState(
               state.gameState,
-              GameEvent.UsePowerUp(playerId, now)
+              GameEvent.UsePowerUp(playerId, power, now)
             )
             if updated != state.gameState then
               val next = state.copy(gameState = updated)
               broadcast(ctx, next)
               running(ctx, next)
             else Behaviors.same
+
+          // ── Cambio de modo de juego (solo en lobby) ───────────────────────
+          case SetGameMode(mode) =>
+            if state.gameState.isRunning || state.gameState.isFinished then Behaviors.same
+            else
+              val updatedPlayers = state.gameState.players.map { case (id, p) =>
+                id -> p.copy(
+                  lives = mode match
+                    case GameMode.LivesBased => Some(GameConfig.InitialLives)
+                    case GameMode.TimeBased  => None
+                )
+              }
+              val newGameState = state.gameState.copy(gameMode = mode, players = updatedPlayers)
+              val next = state.copy(gameState = newGameState)
+              broadcast(ctx, next)
+              running(ctx, next)
 
           // ── Inicio de partida ─────────────────────────────────────────────
           case StartGame =>

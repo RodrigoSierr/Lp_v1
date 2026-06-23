@@ -1,32 +1,50 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TypeRace — LP Edición Escudería</title>
+  <title>TypeRace — LP</title>
   <meta name="description" content="Juego de carreras de mecanografía y reflejos en tiempo real." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <!-- Usamos Share Tech Mono para darle un look auténtico de terminal / desarrollo estudiantil -->
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet" />
-  
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Outfit:wght@400;700;900&display=swap"
+    rel="stylesheet" />
+
   <style>
     :root {
-      --bg:        #121318;
-      --surface:   #191b22;
-      --panel:     #222530;
-      --border:    #000000; /* Bordes negros puros para estilo Neo-Brutalista */
-      --accent:    #2ed573; /* Verde terminal brillante */
-      --accent2:   #ff4757; /* Coral intenso */
-      --danger:    #ff4757;
-      --ok:        #2ed573;
-      --warn:      #ffa502;
-      --text:      #f1f2f6;
-      --muted:     #a4b0be;
-      --block-shadow: 5px 5px 0px #000000; /* Sombra dura clásica hecha a mano */
+      --bg: #121318;
+      --surface: #191b22;
+      --panel: #222530;
+      --border: #000000;
+      /* Bordes negros puros para estilo Neo-Brutalista */
+      --accent: #2ed573;
+      /* Verde terminal brillante */
+      --accent2: #ff4757;
+      /* Coral intenso */
+      --danger: #ff4757;
+      --ok: #2ed573;
+      --warn: #ffa502;
+      --text: #f1f2f6;
+      --muted: #a4b0be;
+      --block-shadow: 5px 5px 0px #000000;
+      /* Sombra dura clásica hecha a mano */
+
+      /* Colores por poder */
+      --freeze-color: #1e90ff;
+      --scramble-color: #ffa502;
+      --hack-color: #9b59b6;
+      --cleanse-color: #2ed573;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       font-family: "Share Tech Mono", "Outfit", monospace, sans-serif;
@@ -38,11 +56,17 @@
 
     /* Fondo de estrellas pixeladas (manejado por JS) */
     #stars-canvas {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
       opacity: 0.4;
     }
 
-    .content { position: relative; z-index: 1; }
+    .content {
+      position: relative;
+      z-index: 1;
+    }
 
     /* ── Header Estilo Consola ────────────────────────────────────────── */
     header {
@@ -57,27 +81,38 @@
     }
 
     .logo {
-      display: flex; align-items: center; gap: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
     }
+
     .logo-icon {
-      width: 40px; height: 40px;
+      width: 40px;
+      height: 40px;
       background: var(--accent);
       color: #000;
       border: 2px solid #000;
       border-radius: 4px;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 1.3rem;
       font-weight: bold;
       box-shadow: 3px 3px 0px #000;
     }
+
     .logo-text-group {
       display: flex;
       flex-direction: column;
     }
+
     h1 {
-      font-size: 1.6rem; font-weight: 900; letter-spacing: 0.02em;
+      font-size: 1.6rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
       color: var(--text);
     }
+
     .group-badge {
       font-size: 0.75rem;
       color: var(--accent);
@@ -86,21 +121,44 @@
     }
 
     .hud {
-      display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.9rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
     }
+
     .hud-item {
-      display: flex; flex-direction: column; align-items: center;
-      background: var(--panel); 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--panel);
       border: 2px solid var(--border);
-      border-radius: 4px; 
-      padding: 0.4rem 1rem; 
+      border-radius: 4px;
+      padding: 0.4rem 1rem;
       min-width: 85px;
       box-shadow: 3px 3px 0px #000;
     }
-    .hud-label { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; }
-    .hud-value { color: var(--accent); font-weight: 700; font-size: 1.1rem; margin-top: 2px; }
-    .hud-value.danger { color: var(--danger); }
-    .hud-value.ok { color: var(--ok); }
+
+    .hud-label {
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .hud-value {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-top: 2px;
+    }
+
+    .hud-value.danger {
+      color: var(--danger);
+    }
+
+    .hud-value.ok {
+      color: var(--ok);
+    }
 
     /* ── Main layout ───────────────────────────────────────────────────── */
     main {
@@ -115,15 +173,33 @@
       border: 3px solid var(--border);
       border-radius: 6px;
       padding: 1.5rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      box-shadow: var(--block-shadow);
+    }
+
+    .join-row {
+      display: flex;
+      gap: 1.2rem;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .join-actions {
       display: flex;
       gap: 1.2rem;
       align-items: center;
       flex-wrap: wrap;
-      box-shadow: var(--block-shadow);
     }
+
     #join-panel label {
-      color: var(--text); font-size: 1rem; font-weight: bold;
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: bold;
     }
 
     input {
@@ -136,6 +212,7 @@
       font-family: inherit;
       outline: none;
     }
+
     input:focus {
       border-color: var(--accent);
       background: #1c1e26;
@@ -146,33 +223,77 @@
       cursor: pointer;
       border: 2px solid var(--border);
       border-radius: 4px;
-      padding: 0.6rem 1.5rem;
-      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
       font-family: inherit;
       font-weight: 700;
       text-transform: uppercase;
       box-shadow: 3px 3px 0px #000;
       transition: transform 0.05s, box-shadow 0.05s;
     }
+
     .btn-primary {
       background: var(--accent);
       color: #000;
     }
+
     .btn-primary:hover:not(:disabled) {
       background: #22be63;
     }
+
     .btn-success {
       background: #ffbc06;
       color: #000;
     }
+
     .btn-success:hover:not(:disabled) {
       background: #e0a300;
     }
+
     .btn:active:not(:disabled) {
       transform: translate(3px, 3px);
       box-shadow: 0px 0px 0px #000;
     }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: 3px 3px 0px #000 !important; }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: 3px 3px 0px #000 !important;
+    }
+
+    /* Botones de modo */
+    .btn-mode {
+      padding: 0.45rem 1rem;
+      font-size: 0.85rem;
+      background: var(--surface);
+      color: var(--muted);
+      border: 2px solid #444;
+    }
+
+    .btn-mode.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .btn-mode:hover:not(.active):not(:disabled) {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    #mode-selector {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .mode-label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      margin-right: 0.3rem;
+    }
 
     #status-bar {
       background: var(--surface);
@@ -183,6 +304,135 @@
       color: var(--muted);
       flex: 1;
       min-width: 200px;
+    }
+
+    .game-layout {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+    }
+
+    .game-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .game-sidebar {
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .sidebar-panel {
+      background: var(--panel);
+      border: 3px solid var(--border);
+      border-radius: 6px;
+      padding: 1.5rem;
+      box-shadow: var(--block-shadow);
+      text-align: center;
+    }
+
+    .sidebar-panel h3 {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    #bigLivesEl {
+      font-size: 2.8rem;
+    }
+
+    /* ── Inventario de poderes ──────────────────────────────────────────── */
+    #power-inventory {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .power-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      background: var(--panel);
+      border: 2px solid #333;
+      border-radius: 6px;
+      padding: 0.6rem 1rem;
+      min-width: 90px;
+      opacity: 0.35;
+      transition: opacity 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.1s;
+      position: relative;
+    }
+
+    .power-slot.available {
+      opacity: 1;
+      border-color: var(--slot-color, var(--accent));
+      box-shadow: 0 0 10px var(--slot-color, var(--accent)), 3px 3px 0px #000;
+      animation: slot-pulse 1.5s ease-in-out infinite;
+    }
+
+    .power-slot.restricted {
+      opacity: 0.2;
+    }
+
+    @keyframes slot-pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 8px var(--slot-color, var(--accent)), 3px 3px 0px #000;
+      }
+
+      50% {
+        box-shadow: 0 0 18px var(--slot-color, var(--accent)), 3px 3px 0px #000;
+      }
+    }
+
+    .power-slot .power-icon {
+      font-size: 1.5rem;
+    }
+
+    .power-slot .power-name {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .power-slot .power-key {
+      font-size: 0.65rem;
+      color: var(--muted);
+      background: var(--bg);
+      border: 1px solid #444;
+      border-radius: 3px;
+      padding: 0.1rem 0.35rem;
+    }
+
+    .power-slot .power-desc {
+      font-size: 0.6rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* Cada poder tiene su color de acento */
+    #slot-freeze {
+      --slot-color: var(--freeze-color);
+    }
+
+    #slot-scramble {
+      --slot-color: var(--scramble-color);
+    }
+
+    #slot-hack {
+      --slot-color: var(--hack-color);
+    }
+
+    #slot-cleanse {
+      --slot-color: var(--cleanse-color);
     }
 
     /* ── Target panel ──────────────────────────────────────────────────── */
@@ -196,9 +446,16 @@
       border: 3px solid var(--border);
       box-shadow: var(--block-shadow);
     }
+
     #target-panel.locked {
       border-color: var(--danger);
       background: #2a181b;
+    }
+
+    #target-panel.eliminated {
+      border-color: #555;
+      background: #1a1a1a;
+      opacity: 0.5;
     }
 
     #target-label {
@@ -207,6 +464,7 @@
       letter-spacing: 0.1em;
       margin-bottom: 0.5rem;
     }
+
     #target-value {
       font-size: clamp(2.5rem, 6vw, 4.5rem);
       font-weight: 700;
@@ -226,7 +484,26 @@
       color: var(--danger);
       text-shadow: 2px 2px 0px #000;
     }
-    #target-panel.locked .lock-overlay { display: flex; }
+
+    #target-panel.locked .lock-overlay {
+      display: flex;
+    }
+
+    .eliminated-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #888;
+    }
+
+    #target-panel.eliminated .eliminated-overlay {
+      display: flex;
+    }
 
     .round-badge {
       display: inline-block;
@@ -248,6 +525,7 @@
       background: #0f1015;
       box-shadow: var(--block-shadow);
     }
+
     canvas#raceCanvas {
       width: 100%;
       height: auto;
@@ -264,7 +542,11 @@
       align-items: center;
       justify-content: center;
     }
-    #winner-overlay.show { display: flex; }
+
+    #winner-overlay.show {
+      display: flex;
+    }
+
     .winner-card {
       background: var(--panel);
       border: 4px solid var(--border);
@@ -275,14 +557,35 @@
       max-width: 450px;
       width: 90%;
     }
-    .winner-trophy { font-size: 4.5rem; margin-bottom: 1rem; }
-    .winner-title { font-size: 1rem; color: var(--accent); text-transform: uppercase; }
+
+    .winner-trophy {
+      font-size: 4.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .winner-title {
+      font-size: 1rem;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
     .winner-name {
-      font-size: 3rem; font-weight: 900; margin: 0.5rem 0;
+      font-size: 3rem;
+      font-weight: 900;
+      margin: 0.5rem 0;
       color: #fff;
     }
-    .winner-score { font-size: 1.3rem; color: var(--muted); margin-bottom: 1rem; }
-    .btn-restart { margin-top: 1rem; width: 100%; }
+
+    .winner-score {
+      font-size: 1.3rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .btn-restart {
+      margin-top: 1rem;
+      width: 100%;
+    }
 
     /* ── Countdown overlay ─────────────────────────────────────────────── */
     #countdown-overlay {
@@ -293,9 +596,13 @@
       align-items: center;
       justify-content: center;
       pointer-events: none;
-      background: rgba(0,0,0,0.3);
+      background: rgba(0, 0, 0, 0.3);
     }
-    #countdown-overlay.show { display: flex; }
+
+    #countdown-overlay.show {
+      display: flex;
+    }
+
     #countdown-num {
       font-size: 10rem;
       font-weight: 900;
@@ -303,32 +610,121 @@
       text-shadow: 5px 5px 0px #000;
     }
 
+    /* ── Toast de poder usado ──────────────────────────────────────────── */
+    #power-toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--panel);
+      border: 2px solid var(--accent);
+      border-radius: 8px;
+      padding: 0.8rem 2rem;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      box-shadow: 4px 4px 0 #000;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      opacity: 0;
+      z-index: 200;
+      pointer-events: none;
+    }
+
+    #power-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 900px) {
+      .game-layout {
+        flex-direction: column;
+      }
+
+      .game-sidebar {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      #power-inventory {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .sidebar-panel {
+        flex: 1;
+        min-width: 250px;
+      }
+    }
+
     @media (max-width: 640px) {
-      main { padding: 1rem; }
-      header { padding: 1rem; }
-      #join-panel { padding: 1rem; }
+      main {
+        padding: 1rem;
+      }
+
+      header {
+        padding: 1rem;
+      }
+
+      #join-panel {
+        padding: 1rem;
+      }
     }
 
     @keyframes shake-debuff {
-      0% { transform: translate(1px, 1px) rotate(0deg); }
-      10% { transform: translate(-1px, -2px) rotate(-1deg); }
-      20% { transform: translate(-3px, 0px) rotate(1deg); }
-      30% { transform: translate(3px, 2px) rotate(0deg); }
-      40% { transform: translate(1px, -1px) rotate(1deg); }
-      50% { transform: translate(-1px, 2px) rotate(-1deg); }
-      60% { transform: translate(-3px, 1px) rotate(0deg); }
-      70% { transform: translate(3px, 1px) rotate(-1deg); }
-      80% { transform: translate(-1px, -1px) rotate(1deg); }
-      90% { transform: translate(1px, 2px) rotate(0deg); }
-      100% { transform: translate(1px, -2px) rotate(-1deg); }
+      0% {
+        transform: translate(1px, 1px) rotate(0deg);
+      }
+
+      10% {
+        transform: translate(-1px, -2px) rotate(-1deg);
+      }
+
+      20% {
+        transform: translate(-3px, 0px) rotate(1deg);
+      }
+
+      30% {
+        transform: translate(3px, 2px) rotate(0deg);
+      }
+
+      40% {
+        transform: translate(1px, -1px) rotate(1deg);
+      }
+
+      50% {
+        transform: translate(-1px, 2px) rotate(-1deg);
+      }
+
+      60% {
+        transform: translate(-3px, 1px) rotate(0deg);
+      }
+
+      70% {
+        transform: translate(3px, 1px) rotate(-1deg);
+      }
+
+      80% {
+        transform: translate(-1px, -1px) rotate(1deg);
+      }
+
+      90% {
+        transform: translate(1px, 2px) rotate(0deg);
+      }
+
+      100% {
+        transform: translate(1px, -2px) rotate(-1deg);
+      }
     }
-    
+
     .debuff-shake {
-      animation: shake-debuff 0.5s cubic-bezier(.36,.07,.19,.97) both;
+      animation: shake-debuff 0.5s cubic-bezier(.36, .07, .19, .97) both;
       filter: blur(1px) sepia(0.5) hue-rotate(-30deg);
     }
   </style>
 </head>
+
 <body>
   <canvas id="stars-canvas"></canvas>
 
@@ -340,7 +736,7 @@
         <div class="logo-text-group">
           <h1>TypeRace.exe</h1>
           <!-- Remplaza esto con el nombre real de tu grupo o materia -->
-          <span class="group-badge">[ PROYECTO LP - GRUPO 04 ]</span>
+          <span class="group-badge">[ PROYECTO LP - GRUPO 07 ]</span>
         </div>
       </div>
       <div class="hud">
@@ -364,34 +760,83 @@
           <span class="hud-label">Estado</span>
           <span class="hud-value" id="gameStatus">Off</span>
         </div>
-        <div class="hud-item">
-          <span class="hud-label">Poder</span>
-          <span class="hud-value" id="powerUp">—</span>
-        </div>
       </div>
     </header>
 
     <main>
       <!-- ── Panel de Control ─────────────────────────────────────── -->
       <div id="join-panel">
-        <label for="nameInput">Usuario:</label>
-        <input id="nameInput" type="text" placeholder="Ingresa tu Nick" maxlength="20" autocomplete="off" />
-        <button id="connectBtn" class="btn btn-primary">🔌 Unirse al lobby</button>
-        <button id="startBtn" class="btn btn-success" disabled>🏁 Iniciar la carrera</button>
+        <div class="join-row">
+          <div class="join-actions">
+            <label for="nameInput">Usuario:</label>
+            <input id="nameInput" type="text" placeholder="Ingresa tu Nick" maxlength="20" autocomplete="off" />
+            <button id="connectBtn" class="btn btn-primary">🔌 Unirse al lobby</button>
+            <button id="startBtn" class="btn btn-success" disabled>🏁 Iniciar la carrera</button>
+          </div>
+          <!-- Selector de modo de juego -->
+          <div id="mode-selector">
+            <span class="mode-label">Modo:</span>
+            <button id="modeTimeBtn" class="btn btn-mode active" title="Ganar por puntos en tiempo limitado">⏱️
+              Tiempo</button>
+            <button id="modeLivesBtn" class="btn btn-mode" title="5 vidas — el último en pie gana">❤️ Vidas ×5</button>
+          </div>
+        </div>
         <div id="status-bar">Introduce tu nombre y únete a la carrera.</div>
       </div>
 
-      <!-- ── Panel de Palabra Objetivo ───────────────────────────── -->
-      <div id="target-panel">
-        <div class="round-badge" id="roundBadge">Ronda 1 · Flechitas</div>
-        <div id="target-label">oÑo</div>
-        <div id="target-value">—</div>
-        <div class="lock-overlay">🔒 BLOQUEADO (Te equivocaste tont@)</div>
-      </div>
+      <div class="game-layout">
+        <div class="game-main">
+          <!-- ── Panel de Palabra Objetivo ───────────────────────────── -->
+          <div id="target-panel">
+            <div class="round-badge" id="roundBadge">Ronda 1 · Flechitas</div>
+            <div id="target-label">oÑo</div>
+            <div id="target-value">—</div>
+            <div class="lock-overlay">🔒 BLOQUEADO (Te equivocaste tont@)</div>
+            <div class="eliminated-overlay">💀 ELIMINADO</div>
+          </div>
 
-      <!-- ── Pista del Juego (Canvas) ─────────────────────────────── -->
-      <div id="race-canvas-wrap">
-        <canvas id="raceCanvas" width="1100" height="420"></canvas>
+          <!-- ── Pista del Juego (Canvas) ─────────────────────────────── -->
+          <div id="race-canvas-wrap">
+            <canvas id="raceCanvas" width="1100" height="420"></canvas>
+          </div>
+        </div>
+
+        <div class="game-sidebar">
+          <!-- ── Panel de Vidas ───────────────────────────────────────── -->
+          <div id="sidebar-lives" class="sidebar-panel" style="display:none">
+            <h3>Tus Vidas</h3>
+            <div id="bigLivesEl">❤️❤️❤️❤️❤️</div>
+          </div>
+
+          <!-- ── Inventario de Poderes ────────────────────────────────── -->
+          <div id="power-inventory" class="sidebar-panel">
+            <h3>Tus Poderes</h3>
+            <div class="power-slot" id="slot-freeze">
+              <span class="power-icon">❄️</span>
+              <span class="power-name">Freeze</span>
+              <span class="power-key">Numpad 1</span>
+              <span class="power-desc">Congela rivales 2s</span>
+            </div>
+            <div class="power-slot" id="slot-scramble">
+              <span class="power-icon">🔀</span>
+              <span class="power-name">Scramble</span>
+              <span class="power-key">Numpad 2</span>
+              <span class="power-desc">Cambia target rival</span>
+            </div>
+            <div class="power-slot" id="slot-hack">
+              <span class="power-icon">💻</span>
+              <span class="power-name">Hack</span>
+              <span class="power-key">Numpad 3</span>
+              <span class="power-desc">Reset palabra+racha (Ronda 3)</span>
+            </div>
+            <div class="power-slot" id="slot-cleanse">
+              <span class="power-icon">✨</span>
+              <span class="power-name">Cleanse</span>
+              <span class="power-key">ESPACIO</span>
+              <span class="power-desc">Elimina tu Freeze</span>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -403,7 +848,8 @@
       <div class="winner-title">¡Ganaste!</div>
       <div class="winner-name" id="winner-name">—</div>
       <div class="winner-score" id="winner-score"></div>
-      <button class="btn btn-primary btn-restart" onclick="document.getElementById('winner-overlay').classList.remove('show')">
+      <button class="btn btn-primary btn-restart"
+        onclick="document.getElementById('winner-overlay').classList.remove('show')">
         Aceptar
       </button>
     </div>
@@ -413,6 +859,9 @@
   <div id="countdown-overlay">
     <div id="countdown-num"></div>
   </div>
+
+  <!-- ── Toast de poder ───────────────────────────────────────── -->
+  <div id="power-toast"></div>
 
   <script>
     /* ═══════════════════════════════════════════════════════════════════
@@ -452,35 +901,48 @@
     /* ═══════════════════════════════════════════════════════════════════
        LÓGICA DEL JUEGO Y WEBSOCKET (Mantiene intactas tus variables de Scala)
     ═══════════════════════════════════════════════════════════════════ */
-    const canvas       = document.getElementById("raceCanvas");
-    const ctx          = canvas.getContext("2d");
-    const nameInput    = document.getElementById("nameInput");
-    const connectBtn   = document.getElementById("connectBtn");
-    const startBtn     = document.getElementById("startBtn");
-    const targetPanel  = document.getElementById("target-panel");
-    const targetValue  = document.getElementById("target-value");
-    const roundEl      = document.getElementById("round");
-    const timeEl       = document.getElementById("time");
-    const streakEl     = document.getElementById("streak");
-    const roundKindEl  = document.getElementById("roundKind");
+    const canvas = document.getElementById("raceCanvas");
+    const ctx = canvas.getContext("2d");
+    const nameInput = document.getElementById("nameInput");
+    const connectBtn = document.getElementById("connectBtn");
+    const startBtn = document.getElementById("startBtn");
+    const targetPanel = document.getElementById("target-panel");
+    const targetValue = document.getElementById("target-value");
+    const roundEl = document.getElementById("round");
+    const timeEl = document.getElementById("time");
+    const streakEl = document.getElementById("streak");
+    const roundKindEl = document.getElementById("roundKind");
     const gameStatusEl = document.getElementById("gameStatus");
-    const powerUpEl    = document.getElementById("powerUp");
-    const statusBar    = document.getElementById("status-bar");
-    const roundBadge   = document.getElementById("roundBadge");
+    const statusBar = document.getElementById("status-bar");
+    const roundBadge = document.getElementById("roundBadge");
+    const sidebarLives = document.getElementById("sidebar-lives");
+    const bigLivesEl = document.getElementById("bigLivesEl");
+    const modeTimeBtn = document.getElementById("modeTimeBtn");
+    const modeLivesBtn = document.getElementById("modeLivesBtn");
+    const powerToast = document.getElementById("power-toast");
 
     let ws = null, selfId = null, lastState = null, connected = false;
     let prevRound = 0;
+    let toastTimeout = null;
+
+    // Configuración visual de los poderes
+    const POWER_CONFIG = {
+      Freeze: { id: "slot-freeze", icon: "❄️", label: "FREEZE aplicado" },
+      Scramble: { id: "slot-scramble", icon: "🔀", label: "SCRAMBLE aplicado" },
+      Hack: { id: "slot-hack", icon: "💻", label: "HACK aplicado" },
+      Cleanse: { id: "slot-cleanse", icon: "✨", label: "CLEANSE activado" },
+    };
 
     // Paleta de competidores sólida y estridente (estilo arcade clásico de 8 bits)
     const LANE_COLORS = [
-      ["#2ed573","#26af5f"],
-      ["#ff4757","#e83e4c"],
-      ["#1e90ff","#1a7cd9"],
-      ["#ffa502","#e69502"],
-      ["#9b59b6","#884ea0"],
-      ["#1abc9c","#16a085"],
-      ["#e67e22","#d35400"],
-      ["#f1c40f","#f39c12"],
+      ["#2ed573", "#26af5f"],
+      ["#ff4757", "#e83e4c"],
+      ["#1e90ff", "#1a7cd9"],
+      ["#ffa502", "#e69502"],
+      ["#9b59b6", "#884ea0"],
+      ["#1abc9c", "#16a085"],
+      ["#e67e22", "#d35400"],
+      ["#f1c40f", "#f39c12"],
     ];
 
     function formatTime(ms) {
@@ -492,22 +954,53 @@
       return { Arrows: "Flechas ↑↓←→", Alphanumeric: "Alfanum.", Words: "Palabras" }[k] ?? k;
     }
 
+    function livesHearts(n, max) {
+      if (n == null) return "";
+      const full = "❤️".repeat(Math.max(0, n));
+      const empty = "🖤".repeat(Math.max(0, max - n));
+      return full + empty;
+    }
+
     function displayTarget(p, roundKind) {
       if (!p) return "—";
       const t = p.currentTarget || "—";
       if (roundKind === "Words" && t.length > 1) {
         const done = t.slice(0, p.targetProgress);
-        const cur  = t[p.targetProgress] ?? "";
+        const cur = t[p.targetProgress] ?? "";
         const rest = t.slice(p.targetProgress + 1);
         return `<span style="color:var(--ok); font-weight: bold;">${done}</span>` +
-               `<span style="color:#ffbc06; text-decoration: underline; font-weight: bold;">${cur}</span>` +
-               `<span style="opacity:.4">${rest}</span>`;
+          `<span style="color:#ffbc06; text-decoration: underline; font-weight: bold;">${cur}</span>` +
+          `<span style="opacity:.4">${rest}</span>`;
       }
       if (roundKind === "Arrows") {
         const map = { UP: "↑", DOWN: "↓", LEFT: "←", RIGHT: "→" };
         return `<span>${map[t] ?? t}</span>`;
       }
       return `<span>${t}</span>`;
+    }
+
+    /* ─── Actualiza el inventario de poderes del propio jugador ──── */
+    function updatePowerInventory(me, round) {
+      const myPowers = me?.powerUps ?? [];
+      for (const [power, cfg] of Object.entries(POWER_CONFIG)) {
+        const slot = document.getElementById(cfg.id);
+        if (!slot) continue;
+        const has = myPowers.includes(power);
+        // Hack restringido fuera de ronda 3
+        const restricted = power === "Hack" && round < 3;
+        slot.classList.toggle("available", has && !restricted);
+        slot.classList.toggle("restricted", !has && restricted);
+      }
+    }
+
+    /* ─── Toast de notificación de poder ─────────────────────── */
+    function showPowerToast(text, color) {
+      if (toastTimeout) clearTimeout(toastTimeout);
+      powerToast.textContent = text;
+      powerToast.style.borderColor = color ?? "var(--accent)";
+      powerToast.style.color = color ?? "var(--accent)";
+      powerToast.classList.add("show");
+      toastTimeout = setTimeout(() => powerToast.classList.remove("show"), 2000);
     }
 
     /* ─── Renderizado en Pista (Canvas) ─────────────────────────────── */
@@ -524,31 +1017,32 @@
         ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
       }
 
-      const n      = Math.max(players.length, 1);
-      const laneH  = Math.floor((H - 30) / n);
-      const maxSc  = Math.max(50, ...players.map(p => p.score), 1);
-      const PAD_L  = 180, PAD_R = 50;
+      const n = Math.max(players.length, 1);
+      const laneH = Math.floor((H - 30) / n);
+      const maxSc = Math.max(50, ...players.map(p => p.score), 1);
+      const PAD_L = 180, PAD_R = 50;
       const trackW = W - PAD_L - PAD_R;
 
       players.forEach((p, i) => {
         const yCenter = 20 + i * laneH + laneH / 2;
-        const pct     = Math.min(1, p.score / maxSc);
-        const carX    = PAD_L + pct * trackW;
+        const pct = Math.min(1, p.score / maxSc);
+        const carX = PAD_L + pct * trackW;
         const [clr1, clr2] = LANE_COLORS[i % LANE_COLORS.length];
-        const isSelf  = p.id === selfId;
+        const isSelf = p.id === selfId;
+        const elim = p.isEliminated;
 
-        // Carril plano con borde negro
-        ctx.fillStyle = "rgba(25, 27, 34, 0.8)";
-        ctx.strokeStyle = "#000000";
+        // Carril plano con borde negro (gris si eliminado)
+        ctx.fillStyle = elim ? "rgba(20,20,20,0.8)" : "rgba(25, 27, 34, 0.8)";
+        ctx.strokeStyle = elim ? "#333" : "#000000";
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.rect(PAD_L, yCenter - 10, trackW, 20);
         ctx.fill();
         ctx.stroke();
 
-        // Relleno de progreso plano
+        // Relleno de progreso plano (atenuado si eliminado)
         if (pct > 0) {
-          ctx.fillStyle = clr1;
+          ctx.fillStyle = elim ? "#333" : clr1;
           ctx.beginPath();
           ctx.rect(PAD_L, yCenter - 9, pct * trackW, 18);
           ctx.fill();
@@ -560,44 +1054,68 @@
           if ((y % 10) === 0) ctx.fillRect(W - PAD_R, y, 4, 5);
         }
 
-        // Vehículo (Bloque rectangular sólido - Cero IA suavizada)
-        const carW = isSelf ? 46 : 40, carH = isSelf ? 20 : 16;
-        ctx.fillStyle = isSelf ? "#ffffff" : clr1;
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.rect(carX - carW/2, yCenter - carH/2, carW, carH);
-        ctx.fill();
-        ctx.stroke();
-
-        // Cabina interna del coche
-        ctx.fillStyle = "#000000";
-        ctx.fillRect(carX + (carW/2) - 14, yCenter - (carH/2) + 3, 8, carH - 6);
-
-        // Alerta de bloqueo por error
-        if (p.isLocked) {
-          ctx.strokeStyle = "var(--danger)";
+        // Vehículo (Bloque rectangular sólido)
+        if (!elim) {
+          const carW = isSelf ? 46 : 40, carH = isSelf ? 20 : 16;
+          ctx.fillStyle = isSelf ? "#ffffff" : clr1;
+          ctx.strokeStyle = "#000000";
           ctx.lineWidth = 3;
           ctx.beginPath();
-          ctx.rect(carX - carW / 2 - 4, yCenter - carH / 2 - 4, carW + 8, carH + 8);
+          ctx.rect(carX - carW / 2, yCenter - carH / 2, carW, carH);
+          ctx.fill();
+          ctx.stroke();
+
+          // Cabina interna del coche
+          ctx.fillStyle = "#000000";
+          ctx.fillRect(carX + (carW / 2) - 14, yCenter - (carH / 2) + 3, 8, carH - 6);
+
+          // Alerta de bloqueo por error
+          if (p.isLocked) {
+            ctx.strokeStyle = "#ff4757";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.rect(carX - carW / 2 - 4, yCenter - carH / 2 - 4, carW + 8, carH + 8);
+            ctx.stroke();
+          }
+        } else {
+          // Cruz de eliminado
+          ctx.strokeStyle = "#555";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(carX - 10, yCenter - 8); ctx.lineTo(carX + 10, yCenter + 8);
+          ctx.moveTo(carX + 10, yCenter - 8); ctx.lineTo(carX - 10, yCenter + 8);
           ctx.stroke();
         }
 
         // Etiqueta del jugador con tipografía monospace
-        ctx.fillStyle = isSelf ? varColorToString("--accent") : "#ffffff";
+        ctx.fillStyle = elim ? "#555" : (isSelf ? varColorToString("--accent") : "#ffffff");
         ctx.font = `bold 14px "Share Tech Mono", monospace`;
         ctx.textBaseline = "middle";
         ctx.fillText(`${p.displayName}`, 10, yCenter - 6);
-        
-        ctx.fillStyle = "#a4b0be";
+
+        ctx.fillStyle = elim ? "#444" : "#a4b0be";
         ctx.font = `12px "Share Tech Mono", monospace`;
         ctx.fillText(`${p.score} PTS`, 10, yCenter + 8);
 
+        // Vidas restantes (modo vidas, no eliminado)
+        if (p.lives != null && !elim) {
+          ctx.fillStyle = "#e74c3c";
+          ctx.font = "11px monospace";
+          ctx.fillText(`❤×${p.lives}`, carX + 28, yCenter - carH / 2 - 6);
+        }
+
         // Contador de racha
-        if (p.streak >= 2) {
+        if (p.streak >= 2 && !elim) {
           ctx.fillStyle = "#ffbc06";
           ctx.font = "bold 13px sans-serif";
-          ctx.fillText(`🔥×${p.streak}`, carX - 15, yCenter - carH / 2 - 6);
+          ctx.fillText(`🔥×${p.streak}`, carX - 15, yCenter - (p.lives != null ? 28 : 20));
+        }
+
+        // Indicador de poder activo
+        if (p.powerUps && p.powerUps.length > 0 && !elim) {
+          ctx.font = "12px monospace";
+          ctx.fillStyle = "#2ed573";
+          ctx.fillText("⚡", carX - 5, yCenter + (isSelf ? 20 : 16));
         }
       });
     }
@@ -608,19 +1126,37 @@
 
     /* ─── Gestión de Estados Reales ───────────────────────── */
     function applyState(msg) {
-      const s    = msg.state;
-      lastState  = s;
-      selfId     = msg.selfId;
+      const s = msg.state;
+      lastState = s;
+      selfId = msg.selfId;
 
-      const me   = s.players.find(p => p.id === selfId);
+      const me = s.players.find(p => p.id === selfId);
       const secs = Math.max(0, Math.ceil(s.timeRemainingMs / 1000));
 
-      roundEl.textContent    = s.round;
-      timeEl.textContent     = formatTime(s.timeRemainingMs);
-      timeEl.className       = `hud-value${secs <= 10 ? " danger" : ""}`;
-      streakEl.textContent   = me ? `${me.streak}${me.streak >= 3 ? "🔥" : ""}` : "0";
+      roundEl.textContent = s.round;
+      timeEl.textContent = formatTime(s.timeRemainingMs);
+      timeEl.className = `hud-value${secs <= 10 ? " danger" : ""}`;
+      streakEl.textContent = me ? `${me.streak}${me.streak >= 3 ? "🔥" : ""}` : "0";
       roundKindEl.textContent = roundKindLabel(s.roundKind);
       roundBadge.textContent = `Ronda ${s.round} · ${roundKindLabel(s.roundKind)}`;
+
+      // Mostrar vidas en sidebar si es modo vidas
+      const isLivesMode = s.gameMode === "LivesBased";
+      sidebarLives.style.display = isLivesMode ? "block" : "none";
+      if (isLivesMode && me) {
+        bigLivesEl.textContent = livesHearts(me.lives, 5);
+      }
+
+      // Selector de modo (solo activo en lobby)
+      if (!s.isRunning && !s.isFinished) {
+        modeTimeBtn.classList.toggle("active", s.gameMode === "TimeBased");
+        modeLivesBtn.classList.toggle("active", s.gameMode === "LivesBased");
+        modeTimeBtn.disabled = false;
+        modeLivesBtn.disabled = false;
+      } else {
+        modeTimeBtn.disabled = true;
+        modeLivesBtn.disabled = true;
+      }
 
       if (s.round !== prevRound && s.isRunning) {
         showCountdown(s.round);
@@ -629,52 +1165,51 @@
         prevRound = s.round;
       }
 
+      // Target panel
       targetValue.innerHTML = displayTarget(me, s.roundKind);
-      if (me?.isLocked) {
+      if (me?.isEliminated) {
+        targetPanel.classList.remove("locked");
+        targetPanel.classList.add("eliminated");
+        document.body.classList.remove("debuff-shake");
+      } else if (me?.isLocked) {
         targetPanel.classList.add("locked");
+        targetPanel.classList.remove("eliminated");
         if (s.isRunning) document.body.classList.add("debuff-shake");
       } else {
-        targetPanel.classList.remove("locked");
+        targetPanel.classList.remove("locked", "eliminated");
         document.body.classList.remove("debuff-shake");
       }
 
-      if (me?.powerUp) {
-        powerUpEl.textContent = `${me.powerUp} (ESPACIO)`;
-        powerUpEl.className = "hud-value ok";
-        powerUpEl.style.textShadow = "0 0 10px var(--ok)";
-      } else {
-        powerUpEl.textContent = "—";
-        powerUpEl.className = "hud-value";
-        powerUpEl.style.textShadow = "none";
-      }
+      // Inventario de poderes
+      updatePowerInventory(me, s.round);
 
       if (s.isFinished) {
         gameStatusEl.textContent = "TERMINADO";
-        gameStatusEl.className   = "hud-value danger";
-        startBtn.disabled        = true;
+        gameStatusEl.className = "hud-value danger";
+        startBtn.disabled = true;
         const winner = s.players.find(p => p.id === s.winnerId);
         if (winner) {
-          document.getElementById("winner-name").textContent  = winner.displayName;
+          document.getElementById("winner-name").textContent = winner.displayName;
           document.getElementById("winner-score").textContent = `${winner.score} puntos acumulados`;
           document.getElementById("winner-overlay").classList.add("show");
         }
         statusBar.textContent = "Partida finalizada de forma síncrona.";
       } else if (s.isRunning) {
         gameStatusEl.textContent = "RUNNING";
-        gameStatusEl.className   = "hud-value ok";
-        startBtn.disabled        = true;
-        statusBar.textContent    = "Capturando teclas activas... ¡Escribe rápido!";
+        gameStatusEl.className = "hud-value ok";
+        startBtn.disabled = true;
+        statusBar.textContent = "Capturando teclas activas... ¡Escribe rápido!";
       } else {
         gameStatusEl.textContent = "LOBBY";
-        gameStatusEl.className   = "hud-value";
-        startBtn.disabled        = !connected || s.players.length === 0;
-        statusBar.textContent    = `[${s.players.length}] jugadores listos. El host debe iniciar la rutina.`;
+        gameStatusEl.className = "hud-value";
+        startBtn.disabled = !connected || s.players.length === 0;
+        statusBar.textContent = `[${s.players.length}] jugadores listos. El host debe iniciar la rutina.`;
       }
     }
 
     function showCountdown(round) {
       const overlay = document.getElementById("countdown-overlay");
-      const numEl   = document.getElementById("countdown-num");
+      const numEl = document.getElementById("countdown-num");
       overlay.classList.add("show");
       numEl.textContent = round > 1 ? `ROUND ${round}` : "¡START!";
       setTimeout(() => overlay.classList.remove("show"), 900);
@@ -682,16 +1217,16 @@
 
     /* ─── Configuración de Eventos del Cliente ───────────────────────── */
     function connect() {
-      const name     = (nameInput.value || "User_Anon").trim();
+      const name = (nameInput.value || "User_Anon").trim();
       const protocol = location.protocol === "https:" ? "wss:" : "ws:";
       ws = new WebSocket(`${protocol}//${location.host}/ws?name=${encodeURIComponent(name)}`);
 
       ws.onopen = () => {
-        connected          = true;
+        connected = true;
         connectBtn.disabled = true;
-        nameInput.disabled  = true;
+        nameInput.disabled = true;
         gameStatusEl.textContent = "LOBBY";
-        statusBar.textContent    = "Socket abierto de forma exitosa. Esperando directivas del servidor...";
+        statusBar.textContent = "Socket abierto de forma exitosa. Esperando directivas del servidor...";
       };
 
       ws.onmessage = ev => {
@@ -700,10 +1235,10 @@
           if (msg.type === "state") applyState(msg);
           if (msg.type === "error") {
             statusBar.textContent = "⚠️ " + msg.message;
-            connected           = false;
+            connected = false;
             connectBtn.disabled = false;
-            nameInput.disabled  = false;
-            startBtn.disabled   = true;
+            nameInput.disabled = false;
+            startBtn.disabled = true;
           }
         } catch (e) {
           console.warn("Payload corrupto o inválido", e);
@@ -711,13 +1246,13 @@
       };
 
       ws.onclose = () => {
-        connected            = false;
-        connectBtn.disabled  = false;
-        nameInput.disabled   = false;
-        startBtn.disabled    = true;
+        connected = false;
+        connectBtn.disabled = false;
+        nameInput.disabled = false;
+        startBtn.disabled = true;
         gameStatusEl.textContent = "OFFLINE";
-        gameStatusEl.className   = "hud-value danger";
-        statusBar.textContent    = "Conexión terminada. Servidor fuera de línea.";
+        gameStatusEl.className = "hud-value danger";
+        statusBar.textContent = "Conexión terminada. Servidor fuera de línea.";
       };
 
       ws.onerror = () => {
@@ -730,6 +1265,26 @@
       ws.send(JSON.stringify({ type: "input", key }));
     }
 
+    /** Envía un mensaje de usar poder al servidor. */
+    function sendPower(power) {
+      if (!ws || ws.readyState !== WebSocket.OPEN || !lastState?.isRunning) return;
+      const me = lastState?.players?.find(p => p.id === selfId);
+      if (!me) return;
+
+      // Verificar que el jugador tiene ese poder
+      if (!me.powerUps.includes(power)) return;
+
+      // Hack solo en ronda 3
+      if (power === "Hack" && lastState.round < 3) {
+        showPowerToast("💻 Hack solo disponible en Ronda 3", "#9b59b6");
+        return;
+      }
+
+      ws.send(JSON.stringify({ type: "use_power", power }));
+      const cfg = POWER_CONFIG[power];
+      if (cfg) showPowerToast(`${cfg.icon} ${cfg.label}!`, null);
+    }
+
     connectBtn.addEventListener("click", connect);
     startBtn.addEventListener("click", () => {
       if (ws?.readyState === WebSocket.OPEN)
@@ -740,11 +1295,37 @@
       if (e.key === "Enter") connect();
     });
 
+    // Botones de modo de juego
+    modeTimeBtn.addEventListener("click", () => {
+      if (!connected) {
+        showPowerToast("🔌 ¡Debes unirte al lobby primero!", "#ff4757");
+        return;
+      }
+      if (lastState?.isRunning) return;
+      ws.send(JSON.stringify({ type: "set_mode", mode: "TimeBased" }));
+    });
+    modeLivesBtn.addEventListener("click", () => {
+      if (!connected) {
+        showPowerToast("🔌 ¡Debes unirte al lobby primero!", "#ff4757");
+        return;
+      }
+      if (lastState?.isRunning) return;
+      ws.send(JSON.stringify({ type: "set_mode", mode: "LivesBased" }));
+    });
+
     window.addEventListener("keydown", ev => {
-      if (!connected || !lastState?.isRunning) return;
+      if (!connected) return;
       if (ev.target === nameInput) return;
-      if (ev.key === " ") ev.preventDefault();
-      else if (ev.key.length > 1 && ev.key !== "ArrowUp" && ev.key !== "ArrowDown" && ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
+
+      // ── Teclas de poderes (funcionan siempre que esté conectado y corriendo) ──
+      if (ev.code === "Numpad1") { ev.preventDefault(); sendPower("Freeze"); return; }
+      if (ev.code === "Numpad2") { ev.preventDefault(); sendPower("Scramble"); return; }
+      if (ev.code === "Numpad3") { ev.preventDefault(); sendPower("Hack"); return; }
+      if (ev.code === "Space") { ev.preventDefault(); sendPower("Cleanse"); return; }
+
+      // ── Teclas de juego (solo durante partida activa) ──────────────────────
+      if (!lastState?.isRunning) return;
+      if (ev.key.length > 1 && ev.key !== "ArrowUp" && ev.key !== "ArrowDown" && ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
       ev.preventDefault();
       sendInput(ev.key);
     });
@@ -755,4 +1336,5 @@
     })();
   </script>
 </body>
+
 </html>
